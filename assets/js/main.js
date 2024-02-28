@@ -1,4 +1,17 @@
 // Menu
+function openImageModal(img) {
+  var modal = document.getElementById("imageModal");
+  var modalImg = document.getElementById("modalImg");
+  modal.style.display = "block";
+  modalImg.src = img.src;
+}
+
+// Function to close the modal
+function closeImageModal() {
+  var modal = document.getElementById("imageModal");
+  modal.style.display = "none";
+}
+
 const navMenu = document.getElementById('nav-menu'),
   navToggle = document.getElementById('nav-toggle'),
   navClose = document.getElementById('nav-close');
