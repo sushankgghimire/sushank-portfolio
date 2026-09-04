@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/hero/Hero.astro';
+import AgentTrace from '../components/AgentTrace.astro';
+import Pillars from '../components/home/Pillars.astro';
+import CaseStudies from '../components/home/CaseStudies.astro';
+import ProjectsGrid from '../components/home/ProjectsGrid.astro';
+import AlsoBuilt from '../components/home/AlsoBuilt.astro';
+import ResearchStrip from '../components/home/ResearchStrip.astro';
+import Experience from '../components/home/Experience.astro';
+import Skills from '../components/home/Skills.astro';
+import Writing from '../components/home/Writing.astro';
+import Contact from '../components/home/Contact.astro';
+import { graph, person, website, profilePage } from '../lib/jsonld';
+
+const title = 'Sushank Ghimire | AI Engineer: LLM Agents, RAG and Document Intelligence';
+const description =
+  'Sushank Ghimire is an AI engineer in Kathmandu, Nepal who builds production LLM agents, RAG pipelines and document intelligence systems with Claude, AWS Bedrock, FastAPI and Python.';
+---
+
+<Base title={title} description={description} type="profile" jsonld={graph(person(), website(), profilePage(new Date()))}>
+  <Hero />
+  <AgentTrace />
+  <Pillars />
+  <CaseStudies />
+  <ProjectsGrid />
+  <AlsoBuilt />
+  <ResearchStrip />
+  <Experience />
+  <Skills />
+  <Writing />
+  <Contact />
+</Base>

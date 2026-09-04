@@ -1,0 +1,129 @@
+---
+title: 'RAG on messy HTML: preprocessing, structure-aware chunking and hybrid retrieval'
+description: 'Fixed-size chunking fails on real documents. What moved retrieval quality for us: boilerplate stripping, heading-aware chunks, hybrid search and a re-ranker.'
+pubDate: 2026-08-26
+tags: ['rag', 'retrieval', 'llm', 'python']
+---
+
+The first version of our retrieval pipeline did what every tutorial does. Strip the tags, split every 500 tokens with a little overlap, embed, store, search by cosine similarity. It looked fine on a handful of test questions.
+
+Then we pointed it at the real corpus: thousands of HTML documents from an insurance analytics product. Tables that ran across three chunks. Navigation menus embedded in every page and retrieved for every query. Headings separated from the paragraphs they described. Answers that cited the right document and the wrong section.
+
+This is what we changed, in the order it made a difference.
+
+## Why fixed-size chunking fails on HTML
+
+Text has structure, and HTML tells you exactly what that structure is. Fixed-size chunking throws the structure away and then hopes the embedding model reconstructs it.
+
+Three failures kept showing up:
+
+- **Boilerplate pollution.** Headers, footers, cookie notices and sidebars appear on every page. They get embedded thousands of times, and because they are short and generic they end up near a lot of queries.
+- **Broken tables.** A rate table linearised as plain text and cut in the middle is worse than no table. The model sees numbers with no column labels and invents relationships.
+- **Lost context.** A paragraph that says "the deductible does not apply in this case" is meaningless without the heading three lines above it that says which case.
+
+None of these are embedding model problems. A better model helps a little. Better preprocessing helps a lot.
+
+## Preprocessing: keep the structure, lose the noise
+
+We parsed the HTML properly instead of stripping tags. Three steps:
+
+**1. Remove boilerplate by structure, not by heuristic.** Elements like `nav`, `header`, `footer`, `aside` and anything with obvious role attributes were dropped. For the corpus-specific junk, we hashed the text of each block and removed blocks that appeared in more than a few percent of documents.
+
+**2. Linearise tables so a row stays a row.** Each row became one line of `column: value` pairs, with the table caption or nearest heading prepended. A table chunk can now stand on its own.
+
+```python
+def table_to_text(table, context: str) -> str:
+    headers = [th.get_text(" ", strip=True) for th in table.select("thead th")] or \
+              [th.get_text(" ", strip=True) for th in table.select("tr:first-child th, tr:first-child td")]
+    lines = [context.strip()]
+    for tr in table.select("tbody tr, tr")[1 if not table.select("thead") else 0:]:
+        cells = [td.get_text(" ", strip=True) for td in tr.select("td, th")]
+        if not any(cells):
+            continue
+        pairs = [f"{h}: {c}" for h, c in zip(headers, cells) if c]
+        lines.append(" | ".join(pairs) if pairs else " | ".join(cells))
+    return "\n".join(lines)
+```
+
+**3. Carry the heading path as metadata.** Every block knows the chain of headings above it: `Policy terms > Deductibles > Exceptions`. That path is stored with the chunk and prepended to the text that gets embedded. It is the single cheapest change on this list and it fixed the lost-context problem almost completely.
+
+## Structure-aware chunking
+
+With clean blocks and heading paths, chunking becomes a packing problem instead of a slicing problem.
+
+The rule: never split inside a block, never combine blocks from different heading paths, and fill each chunk up to a token budget.
+
+```python
+def chunk_blocks(blocks, *, budget=450, overlap_blocks=1):
+    chunks, current, current_path = [], [], None
+    for block in blocks:
+        if current and (block.path != current_path or tokens(current + [block]) > budget):
+            chunks.append(make_chunk(current, current_path))
+            current = current[-overlap_blocks:] if block.path == current_path else []
+        current.append(block)
+        current_path = block.path
+    if current:
+        chunks.append(make_chunk(current, current_path))
+    return chunks
+```
+
+A long block, usually a table or a huge paragraph, gets its own chunk even if it exceeds the budget. Splitting it would destroy exactly the structure we worked to keep. We let the embedding model truncate those and rely on the lexical index to still find them.
+
+Each chunk carries metadata: document title, source URL, heading path, block types it contains, and a content hash for deduplication. All of it is filterable at query time.
+
+## Hybrid retrieval
+
+Dense retrieval alone missed too many exact matches. Policy numbers, form codes, specific dollar amounts, names of endorsements. Embeddings are good at meaning and bad at strings.
+
+So we ran two searches and merged them:
+
+- **BM25** over the chunk text for exact and rare terms.
+- **Dense** search over the embeddings for paraphrase and intent.
+- **Reciprocal rank fusion** to combine the two ranked lists without having to calibrate their scores against each other.
+
+```python
+def rrf(rankings: list[list[str]], k: int = 60) -> list[str]:
+    scores: dict[str, float] = {}
+    for ranking in rankings:
+        for rank, doc_id in enumerate(ranking):
+            scores[doc_id] = scores.get(doc_id, 0.0) + 1.0 / (k + rank + 1)
+    return [d for d, _ in sorted(scores.items(), key=lambda kv: kv[1], reverse=True)]
+```
+
+RRF is almost embarrassingly simple and it beat every weighted-score scheme we tried. It is also robust: when one retriever has a bad day, the other still carries.
+
+## Re-ranking
+
+Fusion gets the right chunks into the top 30. It does not reliably get them into the top 5, and the top 5 is what fits in the prompt.
+
+A cross-encoder re-ranker reads the query and each candidate chunk together and scores the pair. It is slower than embedding search, so it only runs on the fused shortlist. For us it was worth every millisecond: the answer chunk moved from "somewhere in the top 20" to "usually first or second".
+
+If you only add one thing from this post to an existing pipeline, add the re-ranker.
+
+## Latency
+
+All of this adds work per query. Two searches, a fusion step, a re-ranker, then the model. We got the total latency down anyway, and then some:
+
+- **Cache embeddings for queries.** Users ask the same things. So do agents in a loop.
+- **Cache retrieval results** keyed on the normalised query and the filter set, with a short TTL.
+- **Run the two retrievers in parallel**, and run the re-ranker in batches instead of one pair at a time.
+- **Shorten the prompt.** Better retrieval means fewer chunks are needed for the same answer quality. We went from eight chunks to four and the model got faster and more accurate at the same time.
+
+## Evaluate before you touch anything
+
+The mistake I would not repeat: we changed the chunker before we had a way to measure it, and spent a week arguing about whether it was better.
+
+Build a small golden set first. Fifty to a hundred real questions, each with the document and section that contains the answer. Then measure recall at 5 and at 20 for every change. It takes an afternoon and it ends every argument.
+
+## What moved the needle
+
+Roughly in order of impact for our corpus:
+
+1. Heading path prepended to every chunk.
+2. Cross-encoder re-ranker on the fused shortlist.
+3. Boilerplate removal by frequency.
+4. Hybrid retrieval with RRF.
+5. Structure-aware chunking with row-preserving tables.
+6. Caching and parallel retrieval for latency.
+
+Taken together, these changes roughly doubled both the accuracy of the answers and the speed of the system, and users stayed around a lot longer because of it. Not one of them required a bigger model. They required respecting the structure that the documents already had.

@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import SectionHeading from '../SectionHeading.astro';
+import PostCard from '../blog/PostCard.astro';
+import Icon from '../Icon.astro';
+
+const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()).slice(0, 3);
+---
+
+{
+  posts.length > 0 && (
+    <section class="section container" id="writing" aria-labelledby="writing-title">
+      <SectionHeading eyebrow="06 · Writing" title="Notes from building agents and retrieval systems" id="writing-title" text="Longer write-ups on what broke, what fixed it, and what I would do differently.">
+        <a class="btn" href="/blog/">
+          All posts <Icon name="arrow" />
+        </a>
+      </SectionHeading>
+      <div class="grid grid-3">
+        {posts.map((p) => (
+          <PostCard post={p} />
+        ))}
+      </div>
+    </section>
+  )
+}

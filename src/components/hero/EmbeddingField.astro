@@ -1,0 +1,110 @@
+---
+import HeroFallback from './HeroFallback.astro';
+---
+
+<div class="field" data-embedding-field>
+  <HeroFallback />
+  <canvas class="field-canvas" aria-hidden="true"></canvas>
+  <div class="hud hud-tl mono"><span class="dot"></span>embedding space</div>
+  <div class="hud hud-tr mono" data-field-count>4,096 vectors · cos sim &gt; 0.82</div>
+  <div class="hud hud-bl mono" data-field-state>state: clustering</div>
+</div>
+
+<style>
+  .field {
+    position: relative;
+    aspect-ratio: 1;
+    width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background:
+      radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.06), transparent 60%),
+      linear-gradient(180deg, rgba(17, 19, 26, 0.9), rgba(10, 11, 16, 0.95));
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .field-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.2s var(--ease);
+  }
+  .field[data-ready] .field-canvas {
+    opacity: 1;
+  }
+  .field[data-ready] :global(.fallback) {
+    opacity: 0;
+    transition: opacity 1.2s var(--ease);
+  }
+  .hud {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.55rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: rgba(10, 11, 16, 0.65);
+    backdrop-filter: blur(6px);
+    font-size: 0.66rem;
+    z-index: 2;
+  }
+  .hud-tl {
+    top: 0.75rem;
+    left: 0.75rem;
+  }
+  .hud-tr {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+  .hud-bl {
+    bottom: 0.75rem;
+    left: 0.75rem;
+  }
+  .hud-br {
+    bottom: 0.75rem;
+    right: 0.75rem;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent);
+  }
+</style>
+
+<script>
+  const host = document.querySelector<HTMLElement>('[data-embedding-field]');
+  const canvas = host?.querySelector<HTMLCanvasElement>('canvas');
+  const okMotion = matchMedia('(prefers-reduced-motion: no-preference)').matches;
+  const bigScreen = matchMedia('(min-width: 900px) and (pointer: fine)').matches;
+  const nav = navigator as Navigator & { connection?: { saveData?: boolean }; hardwareConcurrency?: number };
+  const capable = (nav.hardwareConcurrency ?? 4) >= 4 && !nav.connection?.saveData;
+
+  // The WebGL field is a desktop treat. Phones and weak devices keep the static constellation.
+  if (host && canvas && okMotion && bigScreen && capable) {
+    const start = () => {
+      import('../../scripts/embedding-field')
+        .then((m) => m.mount(host, canvas))
+        .catch(() => {});
+    };
+    const whenIdle = () => {
+      if ('requestIdleCallback' in window) (window as Window).requestIdleCallback(() => setTimeout(start, 400), { timeout: 3000 });
+      else setTimeout(start, 1500);
+    };
+    const afterLoad = () => {
+      const io = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          whenIdle();
+        }
+      });
+      io.observe(host);
+    };
+    if (document.readyState === 'complete') afterLoad();
+    else window.addEventListener('load', afterLoad, { once: true });
+  }
+</script>

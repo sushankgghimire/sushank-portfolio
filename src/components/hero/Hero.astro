@@ -1,0 +1,207 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../../assets/sushank-ghimire.png';
+import EmbeddingField from './EmbeddingField.astro';
+import Icon from '../Icon.astro';
+import { profile } from '../../data/profile';
+
+const socials = [
+  { name: 'github', href: profile.socials.github, label: 'GitHub' },
+  { name: 'linkedin', href: profile.socials.linkedin, label: 'LinkedIn' },
+  { name: 'x', href: profile.socials.x, label: 'X' },
+] as const;
+---
+
+<section class="hero container" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <p class="eyebrow" data-hero-eyebrow>AI Engineer · Kathmandu, Nepal</p>
+    <h1 id="hero-title" class="hero-title" data-hero-title>Sushank Ghimire</h1>
+    <p class="hero-lede" data-hero-lede>
+      I build <strong>LLM agents</strong> that call tools and drive browsers, <strong>retrieval systems</strong> that survive messy documents, and the{' '}
+      <strong>FastAPI backends</strong> that keep them at 99.9% uptime.
+    </p>
+    <div class="hero-status" data-hero-status>
+      <span class="pill pill-live">Now: {profile.currentEmployer.role} at {profile.currentEmployer.name}</span>
+      <span class="pill">Claude · Bedrock · RAG · Python</span>
+    </div>
+    <div class="hero-cta" data-hero-cta>
+      <a class="btn btn-primary" href="#work" data-magnetic>
+        <span>See the work</span>
+        <Icon name="arrow" />
+      </a>
+      <a class="btn" href="/blog/" data-magnetic>
+        <span>Read the writing</span>
+      </a>
+      <ul class="hero-social" aria-label="Profiles">
+        {
+          socials.map((s) => (
+            <li>
+              <a href={s.href} rel="me noopener" target="_blank" aria-label={`${profile.name} on ${s.label}`}>
+                <Icon name={s.name} size={18} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <div class="hero-visual" data-hero-visual>
+    <EmbeddingField />
+    <figure class="portrait-card">
+      <Image src={portrait} alt="Sushank Ghimire, AI engineer in Kathmandu" width={112} height={112} densities={[1, 2]} loading="eager" fetchpriority="high" />
+      <figcaption>
+        <span class="portrait-name">Sushank Ghimire</span>
+        <span class="mono">sushankgghimire · open to hard problems</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .hero {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+    padding-top: clamp(3rem, 8vw, 6rem);
+    padding-bottom: clamp(2rem, 5vw, 4rem);
+    min-height: calc(100dvh - 4.25rem);
+  }
+  .hero-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .hero-title {
+    font-size: var(--fs-hero);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    background: linear-gradient(180deg, #ffffff 0%, #c9cdd8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero-title :global(.word) {
+    white-space: nowrap;
+  }
+  .hero-title :global(.char) {
+    background: linear-gradient(180deg, #ffffff 0%, #c9cdd8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero-lede {
+    font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+    line-height: 1.55;
+    color: var(--fg-muted);
+    max-width: 34rem;
+    text-wrap: pretty;
+  }
+  .hero-lede strong {
+    color: var(--fg);
+    font-weight: 600;
+  }
+  .hero-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .hero-status .pill {
+    white-space: normal;
+    max-width: 100%;
+    line-height: 1.4;
+  }
+  .hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .hero-social {
+    display: flex;
+    gap: 0.4rem;
+    margin-left: 0.5rem;
+  }
+  .hero-social a {
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    color: var(--fg-muted);
+    transition: color 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .hero-social a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .hero-visual {
+    position: relative;
+    max-width: 540px;
+    width: 100%;
+    margin-inline: auto;
+  }
+  .portrait-card {
+    position: absolute;
+    right: 1rem;
+    bottom: -1.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    margin: 0;
+    padding: 0.6rem 1rem 0.6rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: rgba(17, 19, 26, 0.92);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    white-space: nowrap;
+    z-index: 3;
+  }
+  .portrait-card img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center 20%;
+    border: 2px solid var(--accent);
+    background: #000;
+  }
+  .portrait-card figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    line-height: 1.2;
+  }
+  .portrait-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .portrait-card .mono {
+    font-size: 0.66rem;
+    letter-spacing: 0.04em;
+    text-transform: none;
+  }
+  @media (min-width: 960px) {
+    .hero {
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 4rem;
+    }
+    .hero-visual {
+      margin-inline: 0 0;
+    }
+  }
+  @media (max-width: 480px) {
+    .portrait-card {
+      right: 50%;
+      transform: translateX(50%);
+    }
+    .portrait-card .mono {
+      display: none;
+    }
+  }
+</style>

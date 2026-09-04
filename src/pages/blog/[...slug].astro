@@ -1,0 +1,321 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import portrait from '../../assets/sushank-ghimire.png';
+import { readingTime } from '../../lib/reading-time';
+import { graph, person, website, breadcrumbs, blogPosting } from '../../lib/jsonld';
+import { profile } from '../../data/profile';
+import '../../styles/prose.css';
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
+}
+
+const { post, newer, older } = Astro.props;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const mins = readingTime(post.body);
+const words = post.body ? post.body.split(/\s+/).filter(Boolean).length : undefined;
+const path = `/blog/${post.id}/`;
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+const title = `${post.data.title} | Sushank Ghimire`;
+const jsonld = graph(
+  person(),
+  website(),
+  breadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: 'Writing', path: '/blog/' },
+    { name: post.data.title, path },
+  ]),
+  blogPosting(post, path, words),
+);
+---
+
+<Base
+  title={title}
+  description={post.data.description}
+  type="article"
+  image={`/og/${post.id}.png`}
+  publishedTime={post.data.pubDate}
+  modifiedTime={post.data.updatedDate}
+  tags={post.data.tags}
+  jsonld={jsonld}
+>
+  <article class="post container">
+    <nav class="crumbs mono" aria-label="Breadcrumb">
+      <a href="/">Home</a><span>/</span><a href="/blog/">Writing</a><span>/</span><span aria-current="page">{post.data.title}</span>
+    </nav>
+    <header class="head" data-reveal>
+      <div class="meta mono">
+        <time datetime={post.data.pubDate.toISOString()}>{fmt(post.data.pubDate)}</time>
+        <span>{mins} min read</span>
+        {post.data.updatedDate && <span>Updated {fmt(post.data.updatedDate)}</span>}
+      </div>
+      <h1>{post.data.title}</h1>
+      <p class="lede">{post.data.description}</p>
+      <ul class="tags">
+        {post.data.tags.map((t) => <li><a class="pill" href={`/blog/tags/${t}/`}>#{t}</a></li>)}
+      </ul>
+    </header>
+
+    <div class="layout">
+      <div class="prose" data-reveal>
+        <Content />
+      </div>
+      <aside class="side">
+        {
+          toc.length > 1 && (
+            <nav class="toc card" aria-label="Table of contents" data-toc>
+              <p class="mono">On this page</p>
+              <ol>
+                {toc.map((h) => (
+                  <li class={`d${h.depth}`}>
+                    <a href={`#${h.slug}`}>{h.text}</a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          )
+        }
+      </aside>
+    </div>
+
+    <footer class="post-foot">
+      <div class="author card" data-reveal>
+        <Image src={portrait} alt="Sushank Ghimire, AI engineer" width={72} height={72} densities={[1, 2]} loading="lazy" />
+        <div>
+          <p class="author-name">Written by <a href="/">Sushank Ghimire</a></p>
+          <p class="muted">
+            AI engineer in Kathmandu, Nepal. Currently {profile.currentEmployer.role} at {profile.currentEmployer.name}, building LLM agents and retrieval systems that
+            run in production.
+          </p>
+          <div class="author-links">
+            <a href={profile.socials.github} rel="me noopener" target="_blank"><Icon name="github" size={16} /> GitHub</a>
+            <a href={profile.socials.linkedin} rel="me noopener" target="_blank"><Icon name="linkedin" size={16} /> LinkedIn</a>
+            <a href={profile.socials.x} rel="me noopener" target="_blank"><Icon name="x" size={16} /> X</a>
+          </div>
+        </div>
+      </div>
+      <nav class="pager" aria-label="More posts">
+        {
+          older ? (
+            <a class="pager-link" href={`/blog/${older.id}/`}>
+              <span class="mono">Older</span>
+              <span>{older.data.title}</span>
+            </a>
+          ) : (
+            <span></span>
+          )
+        }
+        {
+          newer ? (
+            <a class="pager-link right" href={`/blog/${newer.id}/`}>
+              <span class="mono">Newer</span>
+              <span>{newer.data.title}</span>
+            </a>
+          ) : (
+            <a class="pager-link right" href="/blog/">
+              <span class="mono">Index</span>
+              <span>All writing</span>
+            </a>
+          )
+        }
+      </nav>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .post {
+    padding-block: 3rem var(--section-gap);
+  }
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+  }
+  .crumbs a:hover {
+    color: var(--accent);
+  }
+  .crumbs span[aria-current] {
+    max-width: 40ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .head {
+    display: grid;
+    gap: 1rem;
+    max-width: 52rem;
+    margin-bottom: 3rem;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .head h1 {
+    font-size: clamp(2rem, 4.6vw, 3.5rem);
+    line-height: 1.05;
+  }
+  .lede {
+    font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+    color: var(--fg-muted);
+    max-width: 50ch;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .tags a:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .layout {
+    display: grid;
+    gap: 3rem;
+  }
+  .prose {
+    max-width: 44rem;
+  }
+  .side {
+    display: none;
+  }
+  .toc {
+    padding: 1.25rem 1.4rem;
+    position: sticky;
+    top: 6rem;
+  }
+  .toc p {
+    margin-bottom: 0.75rem;
+  }
+  .toc ol {
+    display: grid;
+    gap: 0.4rem;
+  }
+  .toc a {
+    color: var(--fg-muted);
+    font-size: 0.9rem;
+    line-height: 1.35;
+    display: block;
+    border-left: 1px solid var(--line);
+    padding-left: 0.75rem;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .toc .d3 a {
+    padding-left: 1.5rem;
+    font-size: 0.84rem;
+  }
+  .toc a:hover,
+  .toc a[aria-current='true'] {
+    color: var(--fg);
+    border-color: var(--accent);
+  }
+  .post-foot {
+    margin-top: 4rem;
+    display: grid;
+    gap: 2rem;
+    max-width: 44rem;
+  }
+  .author {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    align-items: flex-start;
+  }
+  .author img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center 20%;
+    border: 2px solid var(--accent);
+    background: #000;
+    flex-shrink: 0;
+  }
+  .author-name {
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+  .author-name a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .author .muted {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+  }
+  .author-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .author-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.88rem;
+    color: var(--fg-muted);
+  }
+  .author-links a:hover {
+    color: var(--accent);
+  }
+  .pager {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .pager-link {
+    display: grid;
+    gap: 0.3rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+  }
+  .pager-link:hover {
+    border-color: var(--accent);
+  }
+  .pager-link.right {
+    text-align: right;
+  }
+  @media (min-width: 1024px) {
+    .layout {
+      grid-template-columns: minmax(0, 44rem) 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    .side {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  const toc = document.querySelector<HTMLElement>('[data-toc]');
+  if (toc) {
+    const links = [...toc.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
+    const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean) as HTMLElement[];
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            links.forEach((l) => l.removeAttribute('aria-current'));
+            links.find((l) => decodeURIComponent(l.hash.slice(1)) === e.target.id)?.setAttribute('aria-current', 'true');
+          }
+        }
+      },
+      { rootMargin: '-20% 0px -70% 0px' },
+    );
+    targets.forEach((t) => io.observe(t));
+  }
+</script>

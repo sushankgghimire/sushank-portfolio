@@ -1,0 +1,162 @@
+---
+title: 'Making tool-calling agents reliable on AWS Bedrock'
+description: 'Rate limits, timeout cascades and tool schema drift took down our Claude agents more than any bad prompt did. How we fixed each one and reached 99.9% uptime.'
+pubDate: 2026-09-02
+tags: ['agents', 'bedrock', 'claude', 'fastapi']
+---
+
+Most of the time an agent fails in production, the model is not the problem. The prompt is fine. The tools work when you call them by hand. What breaks is everything around the loop: the throttling you did not budget for, the timeout that waits on another timeout, the tool argument that was valid last week and is not valid today.
+
+I spent a year running agentic systems on AWS Bedrock with Claude for insurance workflows. This post is the list of things I wish someone had handed me on day one. None of it is exotic. All of it is the difference between a demo and a service people trust.
+
+## The shape of the loop
+
+An agent loop is simple to draw and hard to keep alive:
+
+1. The model receives the conversation plus a list of tools.
+2. It either answers or asks for a tool call with structured arguments.
+3. Your code runs the tool and appends the result as an observation.
+4. Repeat until the model answers or you stop it.
+
+Every arrow in that picture is a place where the real world leaks in. Step 2 depends on a rate-limited API. Step 3 depends on your own services, and on whatever those services depend on. Step 4 depends on the model deciding to stop, which it will not always do.
+
+Once I started treating each hop as a failure surface instead of a function call, the fixes became obvious.
+
+## Rate limits are a scheduling problem, not an error
+
+Bedrock throttles per model, per region, on both requests per minute and tokens per minute. A single user asking a hard question can trigger five or six model calls in a reflection loop. Ten users doing that at once will hit the ceiling, and the SDK will hand you a `ThrottlingException`.
+
+The wrong fix is to catch it and retry immediately. Every client does that, so the burst gets worse.
+
+What worked:
+
+- **A client-side token bucket** in front of the Bedrock client, sized a little below the account limit. Requests wait in the bucket instead of failing at the API.
+- **Exponential backoff with jitter** for the throttles that still get through. The jitter matters more than the exponent. It spreads the retry wave out.
+- **Separating throttling from real errors.** A throttle is a signal to wait. A validation error is a signal to stop. Retrying a validation error five times just burns budget.
+
+```python
+import asyncio, random
+from botocore.exceptions import ClientError
+
+RETRYABLE = {"ThrottlingException", "ServiceUnavailableException", "ModelTimeoutException"}
+
+async def with_backoff(call, *, attempts=5, base=0.4, cap=8.0):
+    for attempt in range(attempts):
+        try:
+            return await call()
+        except ClientError as e:
+            code = e.response["Error"]["Code"]
+            if code not in RETRYABLE or attempt == attempts - 1:
+                raise
+            sleep = min(cap, base * 2 ** attempt) * random.uniform(0.5, 1.5)
+            await asyncio.sleep(sleep)
+```
+
+The bucket is the piece most teams skip. Without it, backoff just moves the queue from the API into your retry loop, and your p99 latency goes through the roof.
+
+## Timeout cascades
+
+This one hurt the most. The API gateway had a 30 second timeout. The FastAPI handler had a 30 second timeout. The model call had a 30 second timeout. Each tool had its own timeout, also 30 seconds.
+
+You can see the problem. A slow retrieval tool at 28 seconds, followed by one model call at 5 seconds, and the gateway has already closed the connection. The handler keeps working. The model keeps working. Nobody is listening, and the work that was done gets thrown away.
+
+The fix is to think in **budgets**, not timeouts:
+
+- The request arrives with a total budget, say 25 seconds, leaving headroom under the gateway limit.
+- Every downstream call gets a deadline computed from what is left, never a fixed number.
+- If the remaining budget is smaller than the minimum a step needs, skip the step and return the best answer you have.
+
+```python
+import time, asyncio
+
+class Budget:
+    def __init__(self, seconds: float):
+        self.deadline = time.monotonic() + seconds
+
+    @property
+    def remaining(self) -> float:
+        return max(0.0, self.deadline - time.monotonic())
+
+    async def run(self, coro, *, minimum: float = 0.5):
+        if self.remaining < minimum:
+            raise asyncio.TimeoutError("budget exhausted")
+        return await asyncio.wait_for(coro, timeout=self.remaining)
+```
+
+Pair that with a circuit breaker on each tool. If a tool has failed or timed out three times in the last minute, stop calling it and tell the model it is unavailable. The model can usually work around a missing tool. It cannot work around a tool that hangs.
+
+One more thing: raising timeouts is almost never the answer. Longer timeouts hide the slow dependency and make the cascade wider when it finally breaks.
+
+## Tool schema drift
+
+Tools are described to the model as JSON schemas. The model reads the schema, decides to call the tool, and produces arguments. Three things go wrong over time:
+
+1. Someone changes the tool's function signature but not its schema.
+2. Someone changes the schema but the prompt still contains an old example.
+3. The model, under pressure, produces arguments that are close but not exact. A string where an integer was expected. A date in the wrong format. An enum value with different casing.
+
+The first two are process problems. We fixed them by generating the schema from the Pydantic model that the tool actually uses, so they cannot diverge:
+
+```python
+from pydantic import BaseModel, Field
+
+class SearchDocs(BaseModel):
+    query: str = Field(..., description="Natural language query")
+    top_k: int = Field(8, ge=1, le=50)
+    doc_type: Literal["policy", "claim", "endorsement"] | None = None
+
+TOOL_SPEC = {
+    "name": "search_docs",
+    "description": "Search the indexed insurance documents.",
+    "input_schema": SearchDocs.model_json_schema(),
+}
+```
+
+The third is the interesting one. Validate every tool call against the schema before you dispatch it. When validation fails, do not crash and do not silently coerce. Send the validation error back to the model as the observation:
+
+```python
+try:
+    args = SearchDocs.model_validate(call["input"])
+except ValidationError as e:
+    return {"type": "tool_result", "tool_use_id": call["id"], "is_error": True,
+            "content": f"Invalid arguments: {e.errors()}. Fix the arguments and call the tool again."}
+```
+
+Claude is good at reading that error and correcting itself on the next turn. That one change removed a whole category of 500s from our logs.
+
+## Bounded reflection and idempotent tools
+
+Reflection loops, where the model checks its own answer and tries again, improve quality. They also multiply cost and latency, and they can spin. Two rules kept them under control:
+
+- **A hard cap on iterations**, usually two or three. On the last allowed pass the model gets told it is the last pass and must answer.
+- **Tools that are safe to call twice.** If a retry can create a duplicate record or send a second email, the agent cannot be allowed to retry. We made every write tool idempotent with a client-supplied key, so a repeated call is a no-op.
+
+The second rule sounds like backend hygiene, and it is, but it is what makes the first rule safe.
+
+## Observability is not optional
+
+Everything above was possible because we could see what the agent was doing. Every model call and every tool call got:
+
+- a request id that followed the whole loop,
+- latency,
+- input and output token counts,
+- the tool name and whether validation passed,
+- the reason the loop stopped.
+
+That trace made the timeout cascade visible in an afternoon. It also let us prove to the business that the redesign worked: latency and accuracy roughly doubled, retention went up by 80%, and after the FastAPI rewrite the service held 99.9% uptime.
+
+Structured logs are enough to start. You do not need a tracing platform on day one. You do need the request id on every line.
+
+## The checklist
+
+If you are about to put a tool-calling agent in front of real users, this is the short version:
+
+- Put a token bucket in front of the model API. Back off with jitter. Do not retry validation errors.
+- Give each request a budget and derive every downstream deadline from it.
+- Add a circuit breaker per tool.
+- Generate tool schemas from the code that runs the tool.
+- Validate arguments before dispatch and return validation errors to the model.
+- Cap reflection loops and make write tools idempotent.
+- Log request id, latency, tokens and stop reason for every hop.
+
+None of this makes the model smarter. It makes the system around the model honest about what can go wrong, and that turns out to be most of the job.

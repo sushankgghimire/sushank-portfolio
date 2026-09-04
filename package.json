@@ -1,0 +1,28 @@
+{
+  "name": "sushank-portfolio",
+  "type": "module",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^8.0.0",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "@resvg/resvg-js": "^2.6.2",
+    "astro": "^7.3.1",
+    "astro-expressive-code": "^0.44.2",
+    "gsap": "^3.15.0",
+    "ogl": "^1.0.11",
+    "satori": "^0.33.4",
+    "sharp": "^0.35.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "latest",
+    "typescript": "^5.9.0"
+  }
+}

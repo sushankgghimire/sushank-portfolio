@@ -1,0 +1,158 @@
+---
+type Step = { role: 'user' | 'plan' | 'tool' | 'obs' | 'reflect' | 'final'; text: string; meta?: string };
+const steps: Step[] = [
+  { role: 'user', text: 'Pull the deductible and effective date from this 41 page policy PDF.', meta: 'request' },
+  { role: 'plan', text: 'Document is scanned. Run OCR, locate the declarations page, then extract typed fields.', meta: '312 ms' },
+  { role: 'tool', text: 'ocr_document(pages="all", engine="layout")', meta: 'tool_call' },
+  { role: 'obs', text: '41 pages, 2 tables detected, declarations page = 3', meta: '2.4 s' },
+  { role: 'tool', text: 'extract_fields(page=3, schema=PolicyDeclarations)', meta: 'tool_call' },
+  { role: 'obs', text: '{ deductible: "$2,500", effective_date: "2026-03-01", confidence: 0.97 }', meta: '840 ms' },
+  { role: 'reflect', text: 'Deductible matches the premium table on page 7. No schema mismatch. Done.', meta: '1 pass' },
+  { role: 'final', text: 'Deductible $2,500, effective 1 March 2026. Source: page 3, verified against page 7.', meta: '1,912 tokens' },
+];
+const label: Record<Step['role'], string> = {
+  user: 'user',
+  plan: 'plan',
+  tool: 'tool_call',
+  obs: 'observation',
+  reflect: 'reflect',
+  final: 'final',
+};
+---
+
+<section class="trace-wrap container" aria-labelledby="trace-title">
+  <div class="trace card" data-agent-trace>
+    <header class="trace-head">
+      <span class="mono trace-title" id="trace-title"><span class="dot"></span>agent trace · document extraction</span>
+      <span class="mono" data-trace-status>running</span>
+    </header>
+    <ol class="trace-lines">
+      {
+        steps.map((s) => (
+          <li class={`line role-${s.role}`} data-trace-line>
+            <span class="role mono">{label[s.role]}</span>
+            <span class="text" data-trace-text>
+              {s.text}
+            </span>
+            {s.meta && <span class="meta mono">{s.meta}</span>}
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .trace-wrap {
+    padding-top: 3rem;
+  }
+  .trace {
+    padding: 0;
+  }
+  .trace-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 1.1rem;
+    border-bottom: 1px solid var(--line);
+    background: rgba(10, 11, 16, 0.5);
+  }
+  .trace-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--fg);
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 10px var(--ok);
+  }
+  .trace-lines {
+    padding: 0.75rem 0;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.55;
+  }
+  .line {
+    display: grid;
+    grid-template-columns: 7.5rem 1fr auto;
+    gap: 0.5rem 1rem;
+    padding: 0.45rem 1.1rem;
+    align-items: baseline;
+  }
+  .line[data-hidden] {
+    display: none;
+  }
+  .role {
+    color: var(--fg-dim);
+    font-size: 0.72rem;
+  }
+  .text {
+    color: #d6d9e2;
+    word-break: break-word;
+  }
+  .meta {
+    color: var(--fg-dim);
+    font-size: 0.7rem;
+  }
+  .role-user .role {
+    color: var(--fg-muted);
+  }
+  .role-plan .text {
+    color: var(--fg-muted);
+  }
+  .role-tool .role {
+    color: var(--accent);
+  }
+  .role-tool .text {
+    color: var(--accent);
+  }
+  .role-obs .text {
+    color: var(--accent-2);
+  }
+  .role-reflect .role {
+    color: var(--warn);
+  }
+  .role-final .role {
+    color: var(--ok);
+  }
+  .role-final .text {
+    color: var(--fg);
+  }
+  .text[data-typing]::after {
+    content: '';
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    margin-left: 2px;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    animation: blink 0.9s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @media (max-width: 640px) {
+    .line {
+      grid-template-columns: 1fr;
+      gap: 0.15rem;
+    }
+    .meta {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-agent-trace]');
+  if (root && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+    const start = () => setTimeout(() => import('../scripts/agent-trace').then((m) => m.mount(root)).catch(() => {}), 800);
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
+  }
+</script>

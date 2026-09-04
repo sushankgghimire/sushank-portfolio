@@ -1,0 +1,25 @@
+:root {
+  color-scheme: dark;
+  --bg: #0a0b10;
+  --bg-elev: #11131a;
+  --bg-elev-2: #171a24;
+  --line: #1f2330;
+  --line-strong: #2b3040;
+  --fg: #e7e9f0;
+  --fg-muted: #8b91a3;
+  --fg-dim: #5c6275;
+  --accent: #22d3ee;
+  --accent-soft: rgba(34, 211, 238, 0.12);
+  --accent-2: #a78bfa;
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --container: 1180px;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --section-gap: clamp(5rem, 12vw, 9rem);
+  --fs-hero: clamp(2.75rem, 8vw, 6.5rem);
+  --fs-h2: clamp(1.75rem, 3.6vw, 2.75rem);
+  --fs-h3: clamp(1.15rem, 1.6vw, 1.4rem);
+}

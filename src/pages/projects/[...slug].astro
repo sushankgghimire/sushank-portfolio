@@ -1,0 +1,211 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { graph, person, website, breadcrumbs, softwareSourceCode } from '../../lib/jsonld';
+import '../../styles/prose.css';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((p) => ({ params: { slug: p.id }, props: { project: p } }));
+}
+
+const { project } = Astro.props;
+const { data } = project;
+const { Content } = await render(project);
+const title = `${data.title} by Sushank Ghimire`;
+const description = `${data.tagline}. A ${data.category === 'ai' ? 'machine learning' : 'web'} project by Sushank Ghimire built with ${data.stack.slice(0, 3).join(', ')}.`;
+const jsonld = graph(
+  person(),
+  website(),
+  breadcrumbs([
+    { name: 'Home', path: '/' },
+    { name: 'Projects', path: '/projects/' },
+    { name: data.title, path: `/projects/${project.id}/` },
+  ]),
+  softwareSourceCode(project),
+);
+---
+
+<Base title={title} description={description} jsonld={jsonld}>
+  <article class="page container">
+    <nav class="crumbs mono" aria-label="Breadcrumb">
+      <a href="/">Home</a><span>/</span><a href="/projects/">Projects</a><span>/</span><span aria-current="page">{data.title}</span>
+    </nav>
+    <header class="head" data-reveal>
+      <div class="meta">
+        <span class="pill">{data.category === 'ai' ? 'AI / ML' : 'Web'}</span>
+        <span class="mono">{data.year}</span>
+      </div>
+      <h1>{data.title}</h1>
+      <p class="tagline">{data.tagline}</p>
+      <div class="actions">
+        {
+          data.links.live && (
+            <a class="btn btn-primary" href={data.links.live} target="_blank" rel="noopener">
+              Open live <Icon name="external" />
+            </a>
+          )
+        }
+        {
+          data.links.repo && (
+            <a class="btn" href={data.links.repo} target="_blank" rel="noopener">
+              Source code <Icon name="github" />
+            </a>
+          )
+        }
+      </div>
+    </header>
+    {
+      data.cover && (
+        <figure class="cover card" data-reveal>
+          <Image src={data.cover} alt={data.coverAlt ?? `${data.title} by Sushank Ghimire`} widths={[720, 1080, 1400]} sizes="(min-width: 1200px) 1180px, 100vw" loading="eager" />
+        </figure>
+      )
+    }
+    <div class="layout">
+      <div class="prose" data-reveal>
+        <Content />
+      </div>
+      <aside class="side" data-reveal>
+        <div class="card side-card">
+          <h2 class="mono">Stack</h2>
+          <ul class="chips">
+            {data.stack.map((s) => <li class="pill">{s}</li>)}
+          </ul>
+          {
+            data.metrics.length > 0 && (
+              <>
+                <h2 class="mono">At a glance</h2>
+                <dl class="metrics">
+                  {data.metrics.map((m) => (
+                    <div>
+                      <dd>{m.value}</dd>
+                      <dt class="mono">{m.label}</dt>
+                    </div>
+                  ))}
+                </dl>
+              </>
+            )
+          }
+          <h2 class="mono">Author</h2>
+          <p class="author">
+            <a href="/">Sushank Ghimire</a>, AI engineer in Kathmandu, Nepal.
+          </p>
+        </div>
+      </aside>
+    </div>
+    <nav class="back">
+      <a class="btn" href="/projects/"><Icon name="arrow" class="flip" /> All projects</a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .page {
+    padding-block: 3rem var(--section-gap);
+  }
+  .crumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 2rem;
+  }
+  .crumbs a:hover {
+    color: var(--accent);
+  }
+  .head {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+    max-width: 60rem;
+  }
+  .meta {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .head h1 {
+    font-size: clamp(2rem, 5vw, 3.75rem);
+  }
+  .tagline {
+    font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+    color: var(--fg-muted);
+    max-width: 50ch;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+  }
+  .cover {
+    margin: 0 0 3rem;
+    padding: 0;
+  }
+  .cover img {
+    width: 100%;
+    height: auto;
+  }
+  .layout {
+    display: grid;
+    gap: 2.5rem;
+  }
+  .side-card {
+    padding: 1.5rem;
+    display: grid;
+    gap: 0.75rem;
+    position: sticky;
+    top: 6rem;
+  }
+  .side-card h2 {
+    font-size: 0.72rem;
+    color: var(--accent);
+    margin-top: 0.75rem;
+  }
+  .side-card h2:first-child {
+    margin-top: 0;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .metrics {
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .metrics dd {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .metrics dt {
+    font-size: 0.66rem;
+  }
+  .author {
+    font-size: 0.95rem;
+    color: var(--fg-muted);
+  }
+  .author a {
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .back {
+    margin-top: 3rem;
+  }
+  .back :global(.flip) {
+    transform: rotate(180deg);
+  }
+  @media (min-width: 960px) {
+    .layout {
+      grid-template-columns: minmax(0, 1fr) 20rem;
+      gap: 4rem;
+      align-items: start;
+    }
+  }
+</style>

@@ -1,0 +1,9 @@
+{
+  "name": "Sushank Ghimire",
+  "short_name": "Sushank",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }, { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }],
+  "theme_color": "#0a0b10",
+  "background_color": "#0a0b10",
+  "display": "browser",
+  "start_url": "/"
+}

@@ -1,0 +1,123 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../../assets/sushank-ghimire.png';
+import Icon from '../Icon.astro';
+import { profile } from '../../data/profile';
+
+const socials = [
+  { name: 'github', href: profile.socials.github, label: 'GitHub', handle: profile.handles.github },
+  { name: 'linkedin', href: profile.socials.linkedin, label: 'LinkedIn', handle: profile.handles.linkedin },
+  { name: 'x', href: profile.socials.x, label: 'X', handle: `@${profile.handles.x}` },
+  { name: 'instagram', href: profile.socials.instagram, label: 'Instagram', handle: profile.handles.instagram },
+] as const;
+---
+
+<section class="section container" id="contact" aria-labelledby="contact-title">
+  <div class="contact card" data-reveal data-spotlight>
+    <div class="contact-copy">
+      <p class="eyebrow">07 · Contact</p>
+      <h2 id="contact-title">Working on agents, retrieval or document intelligence? Let's talk.</h2>
+      <p class="muted">
+        I am Sushank Ghimire, an AI engineer based in Kathmandu and working with teams around the world. I answer email within a day, and I am happy to look at a
+        hard problem before we talk about anything else.
+      </p>
+      <div class="contact-cta">
+        <a class="btn btn-primary" href={`mailto:${profile.email}`} data-magnetic>
+          <Icon name="mail" />
+          <span>{profile.email}</span>
+        </a>
+        <a class="btn" href={profile.cvPath} target="_blank" rel="noopener" data-magnetic>
+          <Icon name="download" />
+          <span>Download CV</span>
+        </a>
+      </div>
+      <ul class="contact-social">
+        {
+          socials.map((s) => (
+            <li>
+              <a href={s.href} rel="me noopener" target="_blank">
+                <Icon name={s.name} size={16} />
+                <span>{s.label}</span>
+                <span class="mono handle">{s.handle}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div class="contact-portrait">
+      <Image src={portrait} alt="Portrait of Sushank Ghimire, AI engineer in Kathmandu, Nepal" width={320} height={320} densities={[1, 2]} loading="lazy" />
+      <span class="pill pill-live">Kathmandu, UTC+5:45</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact {
+    padding: clamp(1.75rem, 4vw, 3.5rem);
+    display: grid;
+    gap: 2.5rem;
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.06), rgba(167, 139, 250, 0.05)), linear-gradient(180deg, #171a24, #11131a);
+  }
+  .contact h2 {
+    font-size: var(--fs-h2);
+    margin: 0.75rem 0 1rem;
+    max-width: 20ch;
+  }
+  .contact-copy p.muted {
+    max-width: 52ch;
+    margin-bottom: 1.75rem;
+  }
+  .contact-cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+  }
+  .contact-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+  }
+  .contact-social a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--fg-muted);
+    font-size: 0.92rem;
+  }
+  .contact-social a:hover {
+    color: var(--accent);
+  }
+  .handle {
+    font-size: 0.68rem;
+    text-transform: none;
+  }
+  .contact-portrait {
+    position: relative;
+    justify-self: center;
+    display: grid;
+    place-items: center;
+  }
+  .contact-portrait img {
+    width: min(100%, 260px);
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center 15%;
+    border: 1px solid var(--line-strong);
+    background: #000;
+    box-shadow: 0 0 0 10px rgba(34, 211, 238, 0.06), 0 30px 80px rgba(0, 0, 0, 0.5);
+  }
+  .contact-portrait .pill {
+    position: absolute;
+    bottom: 0.5rem;
+  }
+  @media (min-width: 900px) {
+    .contact {
+      grid-template-columns: 1.5fr 1fr;
+      align-items: center;
+    }
+  }
+</style>

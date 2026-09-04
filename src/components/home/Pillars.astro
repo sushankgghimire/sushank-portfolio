@@ -1,0 +1,49 @@
+---
+import SectionHeading from '../SectionHeading.astro';
+import { profile } from '../../data/profile';
+---
+
+<section class="section container" id="what" aria-labelledby="pillars-title">
+  <SectionHeading eyebrow="00 · What I build" title="Four things I do well, all of them in production" id="pillars-title" text="Not demos. Systems that real analysts, agents and customers depend on every day." />
+  <div class="grid grid-2 pillars">
+    {
+      profile.pillars.map((p) => (
+        <article class="card pillar" data-reveal data-spotlight>
+          <span class="mono n">{p.n}</span>
+          <h3>{p.title}</h3>
+          <p>{p.text}</p>
+          <ul class="tags">
+            {p.tags.map((t) => (
+              <li class="pill">{t}</li>
+            ))}
+          </ul>
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .pillar {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    min-height: 100%;
+  }
+  .n {
+    color: var(--accent);
+  }
+  .pillar h3 {
+    font-size: var(--fs-h3);
+  }
+  .pillar p {
+    color: var(--fg-muted);
+    flex: 1;
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+</style>

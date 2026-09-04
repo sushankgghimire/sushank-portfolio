@@ -1,0 +1,17 @@
+---
+import { getCollection } from 'astro:content';
+import SectionHeading from '../SectionHeading.astro';
+import ProjectCard from '../ProjectCard.astro';
+import Icon from '../Icon.astro';
+
+const ai = (await getCollection('projects', (p) => p.data.category === 'ai' && p.data.featured)).sort((a, b) => a.data.order - b.data.order);
+---
+
+<section class="section container" id="projects" aria-labelledby="projects-title">
+  <SectionHeading eyebrow="02 · Projects" title="Open source and side projects" id="projects-title" text="Things I built to learn, to ship, or because nobody had built them yet.">
+    <a class="btn" href="/projects/">All projects <Icon name="arrow" /></a>
+  </SectionHeading>
+  <div class="grid grid-3">
+    {ai.map((p, i) => <ProjectCard project={p} large={i === 0} />)}
+  </div>
+</section>

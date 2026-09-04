@@ -1,0 +1,151 @@
+---
+import SectionHeading from '../SectionHeading.astro';
+import { profile } from '../../data/profile';
+---
+
+<section class="section container" id="work" aria-labelledby="work-title">
+  <SectionHeading eyebrow="01 · Selected work" title="Production AI systems, with the numbers that mattered" id="work-title" text="Three systems from the last two years. Client details stay private, the engineering does not." />
+  <div class="cases">
+    {
+      profile.caseStudies.map((c, i) => (
+        <article class="case card" style={`--i:${i}`} data-spotlight data-case>
+          <div class="case-head">
+            <span class="eyebrow">{c.label}</span>
+            <span class="mono">{c.employer}</span>
+          </div>
+          <div class="case-body">
+            <div class="case-main">
+              <h3>{c.title}</h3>
+              <p class="context">{c.context}</p>
+              <ul class="built">
+                {c.built.map((b) => (
+                  <li>{b}</li>
+                ))}
+              </ul>
+              <ul class="stack">
+                {c.stack.map((s) => (
+                  <li class="pill">{s}</li>
+                ))}
+              </ul>
+            </div>
+            <dl class="outcomes">
+              {c.outcomes.map((o) => (
+                <div class="outcome">
+                  <dt class="mono">{o.label}</dt>
+                  <dd data-counter>{o.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .cases {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .case {
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+  }
+  .case-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .case-body {
+    display: grid;
+    gap: 2rem;
+  }
+  .case h3 {
+    font-size: clamp(1.4rem, 2.4vw, 2rem);
+    margin-bottom: 0.9rem;
+  }
+  .context {
+    color: var(--fg-muted);
+    font-size: 1.05rem;
+    margin-bottom: 1.25rem;
+    max-width: 60ch;
+  }
+  .built {
+    display: grid;
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+    max-width: 64ch;
+  }
+  .built li {
+    position: relative;
+    padding-left: 1.4rem;
+    color: #cfd3dd;
+  }
+  .built li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 0.6rem;
+    height: 1px;
+    background: var(--accent);
+  }
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .outcomes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 1rem;
+    margin: 0;
+    align-content: start;
+  }
+  .outcome {
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: rgba(10, 11, 16, 0.5);
+  }
+  .outcome dt {
+    order: 2;
+    margin-top: 0.4rem;
+    font-size: 0.68rem;
+  }
+  .outcome dd {
+    margin: 0;
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    background: linear-gradient(120deg, #67e8f9, #a78bfa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  @media (min-width: 960px) {
+    .case-body {
+      grid-template-columns: 1.6fr 1fr;
+      gap: 3rem;
+    }
+    .outcomes {
+      grid-template-columns: 1fr;
+    }
+    .case {
+      position: sticky;
+      top: calc(5.5rem + var(--i) * 1.25rem);
+      background: linear-gradient(180deg, #171a24, #11131a);
+    }
+    .cases {
+      padding-bottom: 4rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .case {
+      position: static;
+    }
+  }
+</style>

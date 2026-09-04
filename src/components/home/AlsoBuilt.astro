@@ -1,0 +1,93 @@
+---
+import { getCollection } from 'astro:content';
+import Icon from '../Icon.astro';
+
+const web = (await getCollection('projects', (p) => p.data.category === 'web')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<section class="container also" aria-labelledby="also-title">
+  <div class="also-head" data-reveal>
+    <p class="eyebrow">Also built</p>
+    <h2 id="also-title">Web platforms and backends I have shipped along the way</h2>
+  </div>
+  <ul class="also-list">
+    {
+      web.map((p) => (
+        <li class="also-item" data-reveal>
+          <a href={`/projects/${p.id}/`} class="also-link">
+            <span class="also-title">{p.data.title}</span>
+            <span class="also-tag muted">{p.data.tagline}</span>
+            <span class="also-stack mono">{p.data.stack.slice(0, 3).join(' / ')}</span>
+            <Icon name="arrow" size={16} class="also-arrow" />
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .also {
+    padding-bottom: var(--section-gap);
+  }
+  .also-head {
+    margin-bottom: 2rem;
+  }
+  .also-head h2 {
+    font-size: clamp(1.3rem, 2.2vw, 1.75rem);
+    max-width: 30ch;
+    color: var(--fg);
+  }
+  .also-list {
+    border-top: 1px solid var(--line);
+  }
+  .also-item {
+    border-bottom: 1px solid var(--line);
+  }
+  .also-link {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.25rem 1.5rem;
+    padding: 1.1rem 0;
+    align-items: center;
+    transition: padding-left 0.3s var(--ease);
+  }
+  .also-link:hover {
+    padding-left: 0.75rem;
+  }
+  .also-title {
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  .also-tag {
+    grid-column: 1;
+    font-size: 0.95rem;
+  }
+  .also-stack {
+    grid-column: 1;
+    font-size: 0.68rem;
+  }
+  .also-link :global(.also-arrow) {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    color: var(--fg-dim);
+    transition: color 0.2s, transform 0.3s var(--ease);
+  }
+  .also-link:hover :global(.also-arrow) {
+    color: var(--accent);
+    transform: translateX(4px);
+  }
+  @media (min-width: 900px) {
+    .also-link {
+      grid-template-columns: 16rem 1fr 14rem auto;
+      gap: 1.5rem;
+    }
+    .also-tag,
+    .also-stack {
+      grid-column: auto;
+    }
+    .also-link :global(.also-arrow) {
+      grid-row: auto;
+    }
+  }
+</style>

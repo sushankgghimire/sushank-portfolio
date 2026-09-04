@@ -1,0 +1,153 @@
+---
+import SectionHeading from '../SectionHeading.astro';
+import { profile, formatRange } from '../../data/profile';
+---
+
+<section class="section container" id="experience" aria-labelledby="exp-title">
+  <SectionHeading eyebrow="04 · Experience" title="Where I have worked" id="exp-title" text="From backend developer to AI engineer, with a lot of shipped software in between." />
+  <ol class="timeline">
+    {
+      profile.experience.map((e) => (
+        <li class="entry" data-reveal>
+          <div class="when mono">
+            <span>{formatRange(e.start, e.end)}</span>
+            {e.end === null && <span class="pill pill-live">current</span>}
+          </div>
+          <div class="what">
+            <h3>
+              {e.role} <span class="at">at</span>{' '}
+              {e.url ? (
+                <a href={e.url} target="_blank" rel="noopener">
+                  {e.company}
+                </a>
+              ) : (
+                e.company
+              )}
+            </h3>
+            <p class="summary">{e.summary}</p>
+            <ul class="bullets">
+              {e.bullets.map((b) => (
+                <li>{b}</li>
+              ))}
+            </ul>
+            <ul class="tags">
+              {e.tags.map((t) => (
+                <li class="pill">{t}</li>
+              ))}
+            </ul>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+  <div class="edu card" data-reveal>
+    <div>
+      <p class="eyebrow">Education</p>
+      <h3>{profile.education.degree}</h3>
+      <p class="muted">{profile.education.school}, {profile.education.university}. {profile.education.location}.</p>
+    </div>
+    <div class="edu-meta mono">
+      <span>{profile.education.start} to {profile.education.end}</span>
+      <span>{profile.education.score}</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .timeline {
+    position: relative;
+    display: grid;
+    gap: 0;
+  }
+  .entry {
+    display: grid;
+    gap: 0.75rem;
+    padding: 2rem 0;
+    border-top: 1px solid var(--line);
+  }
+  .entry:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+  .when {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    align-items: center;
+    color: var(--fg-muted);
+  }
+  .what h3 {
+    font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+    margin-bottom: 0.5rem;
+  }
+  .at {
+    color: var(--fg-dim);
+    font-weight: 400;
+  }
+  .what h3 a {
+    text-decoration: underline;
+    text-decoration-color: var(--line-strong);
+    text-underline-offset: 4px;
+  }
+  .what h3 a:hover {
+    color: var(--accent);
+  }
+  .summary {
+    color: var(--fg-muted);
+    margin-bottom: 0.9rem;
+  }
+  .bullets {
+    display: grid;
+    gap: 0.5rem;
+    max-width: 68ch;
+    margin-bottom: 1rem;
+  }
+  .bullets li {
+    position: relative;
+    padding-left: 1.3rem;
+    color: #cfd3dd;
+    font-size: 0.98rem;
+  }
+  .bullets li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75em;
+    width: 0.5rem;
+    height: 1px;
+    background: var(--accent);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .edu {
+    margin-top: 2rem;
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    align-items: center;
+  }
+  .edu h3 {
+    font-size: 1.15rem;
+    margin: 0.4rem 0 0.3rem;
+  }
+  .edu-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    text-align: right;
+  }
+  @media (min-width: 900px) {
+    .entry {
+      grid-template-columns: 15rem 1fr;
+      gap: 2rem;
+    }
+    .when {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

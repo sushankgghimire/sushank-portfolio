@@ -1,0 +1,142 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import Icon from './Icon.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  large?: boolean;
+}
+const { project, large = false } = Astro.props;
+const { data } = project;
+---
+
+<article class:list={['card project', { large }]} data-reveal data-spotlight>
+  {
+    data.cover && (
+      <a class="cover" href={`/projects/${project.id}/`} tabindex="-1" aria-hidden="true">
+        <Image src={data.cover} alt={data.coverAlt ?? `${data.title} by Sushank Ghimire`} widths={[420, 720, 1080]} sizes={large ? '(min-width: 760px) 60vw, 100vw' : '(min-width: 760px) 30vw, 100vw'} loading="lazy" />
+      </a>
+    )
+  }
+  <div class="body">
+    <div class="top">
+      <span class="mono">{data.year}</span>
+      <span class="mono cat">{data.category === 'ai' ? 'AI / ML' : 'Web'}</span>
+    </div>
+    <h3><a href={`/projects/${project.id}/`}>{data.title}</a></h3>
+    <p class="tagline">{data.tagline}</p>
+    <ul class="stack">
+      {data.stack.slice(0, large ? 6 : 4).map((s) => <li class="pill">{s}</li>)}
+    </ul>
+    <div class="links">
+      <a class="link" href={`/projects/${project.id}/`}>Details <Icon name="arrow" size={14} /></a>
+      {
+        data.links.live && (
+          <a class="link" href={data.links.live} target="_blank" rel="noopener">
+            Live <Icon name="external" size={14} />
+          </a>
+        )
+      }
+      {
+        data.links.repo && (
+          <a class="link" href={data.links.repo} target="_blank" rel="noopener">
+            Code <Icon name="github" size={14} />
+          </a>
+        )
+      }
+    </div>
+  </div>
+</article>
+
+<style>
+  .project {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .cover {
+    display: block;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+    background: #000;
+  }
+  .cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    transition: transform 0.6s var(--ease), opacity 0.4s;
+    opacity: 0.85;
+  }
+  .project:hover .cover img {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+  .body {
+    padding: 1.4rem 1.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+  }
+  .top {
+    display: flex;
+    justify-content: space-between;
+  }
+  .cat {
+    color: var(--accent);
+  }
+  .project h3 {
+    font-size: var(--fs-h3);
+  }
+  .project h3 a:hover {
+    color: var(--accent);
+  }
+  .tagline {
+    color: var(--fg-muted);
+    flex: 1;
+  }
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .links {
+    display: flex;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--line);
+  }
+  .link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+  }
+  .link:hover {
+    color: var(--accent);
+  }
+  .large h3 {
+    font-size: clamp(1.4rem, 2.2vw, 1.8rem);
+  }
+  @media (min-width: 760px) {
+    .large {
+      grid-column: span 2;
+      flex-direction: row;
+    }
+    .large .cover {
+      flex: 1.2;
+      aspect-ratio: auto;
+      border-bottom: 0;
+      border-right: 1px solid var(--line);
+    }
+    .large .body {
+      flex: 1;
+      padding: 2rem;
+    }
+  }
+</style>

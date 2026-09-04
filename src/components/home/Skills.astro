@@ -1,0 +1,71 @@
+---
+import SectionHeading from '../SectionHeading.astro';
+import { profile } from '../../data/profile';
+
+const groups: { title: string; items: readonly string[] }[] = [
+  { title: 'AI and ML', items: profile.skills.ai },
+  { title: 'Backend', items: profile.skills.backend },
+  { title: 'Languages', items: profile.skills.languages },
+  { title: 'Infrastructure', items: profile.skills.infra },
+  { title: 'Practices', items: profile.skills.practices },
+];
+---
+
+<section class="section container" id="skills" aria-labelledby="skills-title">
+  <SectionHeading eyebrow="05 · Stack" title="Tools I reach for" id="skills-title" text="The current set. It changes when something better shows up and proves itself." />
+  <div class="skills">
+    {
+      groups.map((g) => (
+        <div class="group" data-reveal>
+          <h3 class="mono">{g.title}</h3>
+          <ul class="chips">
+            {g.items.map((s) => (
+              <li class="chip">{s}</li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .skills {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .group {
+    display: grid;
+    gap: 0.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--line);
+  }
+  .group h3 {
+    font-size: 0.72rem;
+    color: var(--accent);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chip {
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--bg-elev);
+    font-size: 0.92rem;
+    transition: border-color 0.2s, color 0.2s, transform 0.2s;
+  }
+  .chip:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+  @media (min-width: 900px) {
+    .group {
+      grid-template-columns: 12rem 1fr;
+      align-items: start;
+    }
+  }
+</style>
