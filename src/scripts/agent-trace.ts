@@ -31,23 +31,26 @@ export function mount(root: HTMLElement) {
     el.removeAttribute('data-typing');
   };
 
+  // Plays once when the block scrolls into view, then stays on the finished trace.
   const run = async () => {
-    while (alive) {
+    await untilVisible();
+    if (!alive) return;
+    // Freeze each line at its full height so typing never moves the page.
+    lines.forEach((l) => (l.style.minHeight = `${l.offsetHeight}px`));
+    lines.forEach((l) => l.setAttribute('data-hidden', ''));
+    if (status) status.textContent = 'running';
+    const t0 = performance.now();
+    for (let i = 0; i < lines.length; i++) {
       await untilVisible();
-      lines.forEach((l) => l.setAttribute('data-hidden', ''));
-      if (status) status.textContent = 'running';
-      const t0 = performance.now();
-      for (let i = 0; i < lines.length; i++) {
-        await untilVisible();
-        const line = lines[i];
-        const text = line.querySelector<HTMLElement>('[data-trace-text]')!;
-        line.removeAttribute('data-hidden');
-        await type(text, texts[i]);
-        await wait(line.classList.contains('role-tool') ? 520 : 260);
-      }
-      if (status) status.textContent = `done in ${((performance.now() - t0) / 1000).toFixed(1)} s`;
-      await wait(6000);
+      const line = lines[i];
+      const text = line.querySelector<HTMLElement>('[data-trace-text]')!;
+      line.removeAttribute('data-hidden');
+      await type(text, texts[i]);
+      await wait(line.classList.contains('role-tool') ? 520 : 260);
     }
+    if (status) status.textContent = `done in ${((performance.now() - t0) / 1000).toFixed(1)} s`;
+    lines.forEach((l) => (l.style.minHeight = ''));
+    io.disconnect();
   };
 
   run();

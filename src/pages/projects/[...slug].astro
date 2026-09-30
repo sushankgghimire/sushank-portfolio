@@ -15,7 +15,7 @@ const { project } = Astro.props;
 const { data } = project;
 const { Content } = await render(project);
 const title = `${data.title} by Sushank Ghimire`;
-const description = `${data.tagline}. A ${data.category === 'ai' ? 'machine learning' : 'web'} project by Sushank Ghimire built with ${data.stack.slice(0, 3).join(', ')}.`;
+const description = `${data.tagline}. Built with ${data.stack.slice(0, 3).join(', ')}.`;
 const jsonld = graph(
   person(),
   website(),

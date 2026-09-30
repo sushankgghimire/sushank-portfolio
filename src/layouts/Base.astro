@@ -28,7 +28,7 @@ const { jsonld, class: cls, ...seo } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0a0b10" />
+    <meta name="theme-color" content="#f6f2ea" />
     <meta name="generator" content={Astro.generator} />
     <Seo {...seo} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -37,6 +37,7 @@ const { jsonld, class: cls, ...seo } = Astro.props;
     <link rel="alternate" type="application/rss+xml" title={`${profile.name}: writing on AI engineering`} href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <Font cssVariable="--font-sans" preload />
+    <Font cssVariable="--font-serif" preload />
     <Font cssVariable="--font-mono" />
     {jsonld && <JsonLd data={jsonld} />}
     <slot name="head" />
@@ -48,13 +49,6 @@ const { jsonld, class: cls, ...seo } = Astro.props;
       <slot />
     </main>
     <Footer />
-    <svg class="grain" aria-hidden="true" focusable="false">
-      <filter id="grain-f">
-        <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"></feTurbulence>
-        <feColorMatrix type="saturate" values="0"></feColorMatrix>
-      </filter>
-      <rect width="100%" height="100%" filter="url(#grain-f)"></rect>
-    </svg>
     <script src="../scripts/motion.ts"></script>
   </body>
 </html>

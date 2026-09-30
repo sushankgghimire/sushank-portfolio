@@ -9,7 +9,7 @@ const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) =>
 const tags = [...new Set(posts.flatMap((p) => p.data.tags))].sort();
 const title = 'Writing on AI engineering by Sushank Ghimire';
 const description =
-  'Essays and field notes by Sushank Ghimire on building LLM agents, retrieval-augmented generation, document extraction and the FastAPI backends that hold them together.';
+  'Essays and field notes on building LLM agents, retrieval-augmented generation, document extraction and the FastAPI backends behind them.';
 ---
 
 <Base title={title} description={description} jsonld={graph(person(), website(), breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Writing', path: '/blog/' }]), blogIndex(posts))}>

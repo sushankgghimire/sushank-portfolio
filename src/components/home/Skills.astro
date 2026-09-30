@@ -12,17 +12,13 @@ const groups: { title: string; items: readonly string[] }[] = [
 ---
 
 <section class="section container" id="skills" aria-labelledby="skills-title">
-  <SectionHeading eyebrow="05 · Stack" title="Tools I reach for" id="skills-title" text="The current set. It changes when something better shows up and proves itself." />
+  <SectionHeading title="Tools I reach for" id="skills-title" text="What I use now. It changes when something better proves itself." />
   <div class="skills">
     {
       groups.map((g) => (
         <div class="group" data-reveal>
-          <h3 class="mono">{g.title}</h3>
-          <ul class="chips">
-            {g.items.map((s) => (
-              <li class="chip">{s}</li>
-            ))}
-          </ul>
+          <h3>{g.title}</h3>
+          <p>{g.items.join(', ')}</p>
         </div>
       ))
     }
@@ -30,42 +26,22 @@ const groups: { title: string; items: readonly string[] }[] = [
 </section>
 
 <style>
-  .skills {
-    display: grid;
-    gap: 1.5rem;
-  }
   .group {
     display: grid;
-    gap: 0.75rem;
-    padding-top: 1.25rem;
+    gap: 0.4rem;
+    padding: 1.25rem 0;
     border-top: 1px solid var(--line);
   }
   .group h3 {
-    font-size: 0.72rem;
-    color: var(--accent);
+    font-size: 1.1rem;
   }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .chip {
-    padding: 0.5rem 0.9rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: var(--bg-elev);
-    font-size: 0.92rem;
-    transition: border-color 0.2s, color 0.2s, transform 0.2s;
-  }
-  .chip:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    transform: translateY(-2px);
+  .group p {
+    max-width: 64ch;
   }
   @media (min-width: 900px) {
     .group {
-      grid-template-columns: 12rem 1fr;
-      align-items: start;
+      grid-template-columns: 14rem 1fr;
+      gap: 2rem;
     }
   }
 </style>

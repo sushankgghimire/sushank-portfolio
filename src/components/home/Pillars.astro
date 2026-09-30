@@ -4,46 +4,48 @@ import { profile } from '../../data/profile';
 ---
 
 <section class="section container" id="what" aria-labelledby="pillars-title">
-  <SectionHeading eyebrow="00 · What I build" title="Four things I do well, all of them in production" id="pillars-title" text="Not demos. Systems that real analysts, agents and customers depend on every day." />
-  <div class="grid grid-2 pillars">
+  <SectionHeading title="What I build" id="pillars-title" text="Agents, retrieval, browser automation and the backends behind them. All of it runs in production." />
+  <ol class="pillars">
     {
       profile.pillars.map((p) => (
-        <article class="card pillar" data-reveal data-spotlight>
-          <span class="mono n">{p.n}</span>
+        <li class="pillar" data-reveal>
+          <span class="n">{p.n}</span>
           <h3>{p.title}</h3>
           <p>{p.text}</p>
-          <ul class="tags">
-            {p.tags.map((t) => (
-              <li class="pill">{t}</li>
-            ))}
-          </ul>
-        </article>
+          <p class="tags">{p.tags.join(', ')}</p>
+        </li>
       ))
     }
-  </div>
+  </ol>
 </section>
 
 <style>
+  .pillars {
+    display: grid;
+    gap: 0 3rem;
+  }
   .pillar {
-    padding: 1.75rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    min-height: 100%;
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+    padding: 1.75rem 0 2rem;
+    border-top: 1px solid var(--line);
   }
   .n {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
     color: var(--accent);
   }
   .pillar h3 {
     font-size: var(--fs-h3);
   }
-  .pillar p {
-    color: var(--fg-muted);
-    flex: 1;
-  }
   .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+  }
+  @media (min-width: 760px) {
+    .pillars {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 </style>

@@ -10,7 +10,7 @@ const posts = (await getCollection('blog', (p) => !p.data.draft)).sort((a, b) =>
 {
   posts.length > 0 && (
     <section class="section container" id="writing" aria-labelledby="writing-title">
-      <SectionHeading eyebrow="06 · Writing" title="Notes from building agents and retrieval systems" id="writing-title" text="Longer write-ups on what broke, what fixed it, and what I would do differently.">
+      <SectionHeading title="Notes from building agents and retrieval systems" id="writing-title" text="Write-ups on what broke and what fixed it.">
         <a class="btn" href="/blog/">
           All posts <Icon name="arrow" />
         </a>

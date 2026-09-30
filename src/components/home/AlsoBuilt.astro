@@ -36,7 +36,6 @@ const web = (await getCollection('projects', (p) => p.data.category === 'web')).
   .also-head h2 {
     font-size: clamp(1.3rem, 2.2vw, 1.75rem);
     max-width: 30ch;
-    color: var(--fg);
   }
   .also-list {
     border-top: 1px solid var(--line);
@@ -50,14 +49,17 @@ const web = (await getCollection('projects', (p) => p.data.category === 'web')).
     gap: 0.25rem 1.5rem;
     padding: 1.1rem 0;
     align-items: center;
-    transition: padding-left 0.3s var(--ease);
   }
-  .also-link:hover {
-    padding-left: 0.75rem;
+  .also-link:hover .also-title {
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 4px;
   }
   .also-title {
+    font-family: var(--font-serif);
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: 1.15rem;
+    color: var(--ink);
   }
   .also-tag {
     grid-column: 1;
@@ -71,11 +73,10 @@ const web = (await getCollection('projects', (p) => p.data.category === 'web')).
     grid-column: 2;
     grid-row: 1 / span 3;
     color: var(--fg-dim);
-    transition: color 0.2s, transform 0.3s var(--ease);
+    transition: color 0.2s;
   }
   .also-link:hover :global(.also-arrow) {
     color: var(--accent);
-    transform: translateX(4px);
   }
   @media (min-width: 900px) {
     .also-link {

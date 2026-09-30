@@ -9,19 +9,18 @@
 html {
   background: var(--bg);
   scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   min-height: 100dvh;
-  background-color: var(--bg);
-  background-image: radial-gradient(rgba(231, 233, 240, 0.055) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background: var(--bg);
   color: var(--fg);
   font-family: var(--font-sans);
-  font-size: 1.0625rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.65;
   overflow-x: clip;
 }
 
@@ -30,8 +29,8 @@ body {
 }
 
 ::selection {
-  background: var(--accent);
-  color: #06171a;
+  background: var(--ink);
+  color: var(--bg);
 }
 
 h1,
@@ -39,14 +38,17 @@ h2,
 h3,
 h4 {
   margin: 0;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
   text-wrap: balance;
 }
 
 p {
   margin: 0;
+  text-wrap: pretty;
 }
 
 a {
@@ -56,8 +58,7 @@ a {
 
 img,
 svg,
-video,
-canvas {
+video {
   display: block;
   max-width: 100%;
 }
@@ -91,31 +92,16 @@ ol {
   position: relative;
 }
 
+/* Small meta text: years, categories, labels. Sans, sentence case, no shouting. */
 .mono {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 0.85rem;
   color: var(--fg-muted);
 }
 
 .eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: var(--accent);
-}
-
-.eyebrow::before {
-  content: '';
-  width: 1.5rem;
-  height: 1px;
-  background: var(--accent);
-  opacity: 0.7;
 }
 
 .muted {
@@ -128,8 +114,8 @@ ol {
   top: -100%;
   z-index: 100;
   padding: 0.6rem 1rem;
-  background: var(--accent);
-  color: #06171a;
+  background: var(--ink);
+  color: var(--bg);
   border-radius: var(--radius-sm);
   font-weight: 600;
 }
@@ -144,66 +130,46 @@ ol {
   border-radius: 4px;
 }
 
+/* Cards are for things that are their own destination (a project, a post, a paper). */
 .card {
-  --mx: 50%;
-  --my: 50%;
   position: relative;
   border: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(23, 26, 36, 0.8), rgba(17, 19, 26, 0.9));
+  background: var(--bg-elev);
   border-radius: var(--radius);
   overflow: hidden;
-  transition: border-color 0.3s var(--ease), transform 0.3s var(--ease);
-}
-
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(420px circle at var(--mx) var(--my), rgba(34, 211, 238, 0.09), transparent 45%);
-  opacity: 0;
-  transition: opacity 0.35s var(--ease);
+  transition: border-color 0.2s;
 }
 
 .card:hover {
   border-color: var(--line-strong);
 }
 
-.card:hover::before {
-  opacity: 1;
-}
-
 .btn {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  padding: 0.85rem 1.35rem;
-  border-radius: 999px;
-  border: 1px solid var(--line-strong);
-  font-weight: 500;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--ink);
+  font-weight: 600;
   font-size: 0.95rem;
-  line-height: 1;
-  background: var(--bg-elev);
-  color: var(--fg);
-  transition: background-color 0.25s var(--ease), border-color 0.25s var(--ease), color 0.25s var(--ease), transform 0.25s var(--ease);
-  will-change: transform;
+  line-height: 1.2;
+  background: transparent;
+  color: var(--ink);
+  transition: background-color 0.2s, color 0.2s;
 }
 
 .btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  background: var(--bg-elev-2);
 }
 
 .btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #06171a;
+  background: var(--ink);
+  color: var(--bg);
 }
 
 .btn-primary:hover {
-  background: #67e8f9;
-  border-color: #67e8f9;
-  color: #06171a;
+  background: var(--ink-deep);
 }
 
 .btn svg {
@@ -211,52 +177,16 @@ ol {
   height: 1rem;
 }
 
+/* Small tag. Quiet on purpose. */
 .pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: var(--bg-elev);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
+  gap: 0.4rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
+  background: var(--bg-elev-2);
+  font-size: 0.8rem;
   color: var(--fg-muted);
-  white-space: nowrap;
-}
-
-.pill-live::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
-  animation: pulse 2.2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(52, 211, 153, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0);
-  }
-}
-
-.grain {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 50;
-  pointer-events: none;
-  opacity: 0.035;
-  mix-blend-mode: screen;
 }
 
 .section-head {
@@ -265,16 +195,16 @@ ol {
   align-items: end;
   justify-content: space-between;
   gap: 1rem 2rem;
-  margin-bottom: clamp(2rem, 5vw, 3.5rem);
+  margin-bottom: clamp(2rem, 4vw, 3rem);
 }
 
 .section-head h2 {
   font-size: var(--fs-h2);
-  max-width: 22ch;
+  max-width: 24ch;
 }
 
 .section-head p {
-  max-width: 48ch;
+  max-width: 46ch;
   color: var(--fg-muted);
 }
 
@@ -298,6 +228,18 @@ ol {
   }
 }
 
+/* Scroll reveal. Only hides content when JS has marked the page (see scripts/motion.ts). */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+
+.js [data-reveal].in {
+  opacity: 1;
+  transform: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -306,5 +248,9 @@ ol {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
   }
 }

@@ -6,7 +6,7 @@ import { graph, person, website, breadcrumbs, scholarlyArticles } from '../lib/j
 
 const title = 'Machine learning research and papers by Sushank Ghimire';
 const description =
-  'Six machine learning studies by Sushank Ghimire: PCA, decision trees, Naive Bayes, KNN, neural networks and KD-trees, each with a runnable notebook and a written paper.';
+  'Six machine learning studies: PCA, decision trees, Naive Bayes, KNN, neural networks and KD-trees, each with a runnable notebook and a paper.';
 const jsonld = graph(person(), website(), breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Research', path: '/research/' }]), ...scholarlyArticles());
 ---
 
@@ -24,7 +24,7 @@ const jsonld = graph(person(), website(), breadcrumbs([{ name: 'Home', path: '/'
     <ol class="studies">
       {
         profile.research.map((s, i) => (
-          <li class="study card" id={s.slug} data-reveal data-spotlight>
+          <li class="study card" id={s.slug} data-reveal>
             <div class="study-meta">
               <span class="mono idx">0{i + 1}</span>
               <span class="pill">{s.method}</span>

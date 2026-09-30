@@ -7,9 +7,9 @@ import { graph, person, website, breadcrumbs } from '../../lib/jsonld';
 const all = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 const ai = all.filter((p) => p.data.category === 'ai');
 const web = all.filter((p) => p.data.category === 'web');
-const title = 'Projects by Sushank Ghimire: AI, machine learning and backend work';
+const title = 'Projects by Sushank Ghimire: AI, ML and backend work';
 const description =
-  'Open source and side projects by Sushank Ghimire, from a transformer-based crossword solver and YOLO license plate detection to async FastAPI services and Django platforms.';
+  'Open source and side projects, from a transformer crossword solver and YOLO license plate detection to async FastAPI services and Django platforms.';
 ---
 
 <Base title={title} description={description} jsonld={graph(person(), website(), breadcrumbs([{ name: 'Home', path: '/' }, { name: 'Projects', path: '/projects/' }]))}>

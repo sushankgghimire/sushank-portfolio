@@ -7,7 +7,7 @@ tags: ['agents', 'bedrock', 'claude', 'fastapi']
 
 Most of the time an agent fails in production, the model is not the problem. The prompt is fine. The tools work when you call them by hand. What breaks is everything around the loop: the throttling you did not budget for, the timeout that waits on another timeout, the tool argument that was valid last week and is not valid today.
 
-I spent a year running agentic systems on AWS Bedrock with Claude for insurance workflows. This post is the list of things I wish someone had handed me on day one. None of it is exotic. All of it is the difference between a demo and a service people trust.
+I spent a year running agentic systems on AWS Bedrock with Claude for insurance workflows. This post is the list of things I wish someone had handed me on day one. None of it is exotic, but together it separates a demo from a service people trust.
 
 ## The shape of the loop
 
@@ -22,7 +22,7 @@ Every arrow in that picture is a place where the real world leaks in. Step 2 dep
 
 Once I started treating each hop as a failure surface instead of a function call, the fixes became obvious.
 
-## Rate limits are a scheduling problem, not an error
+## Rate limits are a scheduling problem
 
 Bedrock throttles per model, per region, on both requests per minute and tokens per minute. A single user asking a hard question can trigger five or six model calls in a reflection loop. Ten users doing that at once will hit the ceiling, and the SDK will hand you a `ThrottlingException`.
 
@@ -30,9 +30,9 @@ The wrong fix is to catch it and retry immediately. Every client does that, so t
 
 What worked:
 
-- **A client-side token bucket** in front of the Bedrock client, sized a little below the account limit. Requests wait in the bucket instead of failing at the API.
-- **Exponential backoff with jitter** for the throttles that still get through. The jitter matters more than the exponent. It spreads the retry wave out.
-- **Separating throttling from real errors.** A throttle is a signal to wait. A validation error is a signal to stop. Retrying a validation error five times just burns budget.
+- A client-side token bucket in front of the Bedrock client, sized a little below the account limit. Requests wait in the bucket instead of failing at the API.
+- Exponential backoff with jitter for the throttles that still get through. The jitter matters more than the exponent. It spreads the retry wave out.
+- Separating throttling from real errors. A throttle is a signal to wait. A validation error is a signal to stop. Retrying a validation error five times just burns budget.
 
 ```python
 import asyncio, random
@@ -58,9 +58,9 @@ The bucket is the piece most teams skip. Without it, backoff just moves the queu
 
 This one hurt the most. The API gateway had a 30 second timeout. The FastAPI handler had a 30 second timeout. The model call had a 30 second timeout. Each tool had its own timeout, also 30 seconds.
 
-You can see the problem. A slow retrieval tool at 28 seconds, followed by one model call at 5 seconds, and the gateway has already closed the connection. The handler keeps working. The model keeps working. Nobody is listening, and the work that was done gets thrown away.
+Add them up and the problem shows. A slow retrieval tool takes 28 seconds, one model call takes 5, and the gateway has already closed the connection. The handler and the model keep working, but nobody is listening, and the finished work gets thrown away.
 
-The fix is to think in **budgets**, not timeouts:
+The fix is to give every request a budget:
 
 - The request arrives with a total budget, say 25 seconds, leaving headroom under the gateway limit.
 - Every downstream call gets a deadline computed from what is left, never a fixed number.
@@ -85,7 +85,7 @@ class Budget:
 
 Pair that with a circuit breaker on each tool. If a tool has failed or timed out three times in the last minute, stop calling it and tell the model it is unavailable. The model can usually work around a missing tool. It cannot work around a tool that hangs.
 
-One more thing: raising timeouts is almost never the answer. Longer timeouts hide the slow dependency and make the cascade wider when it finally breaks.
+Raising timeouts is almost never the answer. Longer timeouts hide the slow dependency and make the cascade wider when it finally breaks.
 
 ## Tool schema drift
 
@@ -128,12 +128,12 @@ Claude is good at reading that error and correcting itself on the next turn. Tha
 
 Reflection loops, where the model checks its own answer and tries again, improve quality. They also multiply cost and latency, and they can spin. Two rules kept them under control:
 
-- **A hard cap on iterations**, usually two or three. On the last allowed pass the model gets told it is the last pass and must answer.
-- **Tools that are safe to call twice.** If a retry can create a duplicate record or send a second email, the agent cannot be allowed to retry. We made every write tool idempotent with a client-supplied key, so a repeated call is a no-op.
+- A hard cap on iterations, usually two or three. On the last allowed pass the model gets told it is the last pass and must answer.
+- Tools that are safe to call twice. If a retry can create a duplicate record or send a second email, the agent cannot be allowed to retry. We made every write tool idempotent with a client-supplied key, so a repeated call is a no-op.
 
 The second rule sounds like backend hygiene, and it is, but it is what makes the first rule safe.
 
-## Observability is not optional
+## Log every hop
 
 Everything above was possible because we could see what the agent was doing. Every model call and every tool call got:
 
@@ -145,7 +145,7 @@ Everything above was possible because we could see what the agent was doing. Eve
 
 That trace made the timeout cascade visible in an afternoon. It also let us prove to the business that the redesign worked: latency and accuracy roughly doubled, retention went up by 80%, and after the FastAPI rewrite the service held 99.9% uptime.
 
-Structured logs are enough to start. You do not need a tracing platform on day one. You do need the request id on every line.
+Structured logs are enough to start, as long as the request id is on every line. A tracing platform can wait.
 
 ## The checklist
 
@@ -159,4 +159,4 @@ If you are about to put a tool-calling agent in front of real users, this is the
 - Cap reflection loops and make write tools idempotent.
 - Log request id, latency, tokens and stop reason for every hop.
 
-None of this makes the model smarter. It makes the system around the model honest about what can go wrong, and that turns out to be most of the job.
+The model gets no smarter from any of this. The system around it just stops falling over, and that turns out to be most of the job.

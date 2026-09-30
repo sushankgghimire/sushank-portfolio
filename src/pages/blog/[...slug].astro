@@ -24,7 +24,7 @@ const mins = readingTime(post.body);
 const words = post.body ? post.body.split(/\s+/).filter(Boolean).length : undefined;
 const path = `/blog/${post.id}/`;
 const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-const title = `${post.data.title} | Sushank Ghimire`;
+const title = post.data.title.length > 45 ? post.data.title : `${post.data.title} | Sushank Ghimire`;
 const jsonld = graph(
   person(),
   website(),
@@ -238,7 +238,7 @@ const jsonld = graph(
     object-fit: cover;
     object-position: center 20%;
     border: 2px solid var(--accent);
-    background: #000;
+    background: var(--bg-elev-2);
     flex-shrink: 0;
   }
   .author-name {

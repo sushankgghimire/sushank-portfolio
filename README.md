@@ -6,7 +6,8 @@ Personal site of Sushank Ghimire, AI engineer in Kathmandu, Nepal. Built with As
 
 - Astro 7 (static output, content collections, built-in Fonts API)
 - MDX blog with Expressive Code for syntax highlighting
-- GSAP for scroll choreography, OGL for the WebGL hero, both loaded after idle
+- No animation library: a 15-line IntersectionObserver fades sections in, and the agent-trace block is a small typed loader
+- Warm paper theme: colours live in `src/styles/tokens.css` (paper, ink blue, one crimson accent), fonts are Fraunces, Manrope and JetBrains Mono
 - satori + resvg for build-time Open Graph images
 - JSON-LD (Person, WebSite, ProfilePage, BlogPosting, SoftwareSourceCode, ScholarlyArticle)
 

@@ -14,12 +14,21 @@ export default defineConfig({
   fonts: [
     {
       provider: fontProviders.google(),
-      name: 'Inter Tight',
+      name: 'Manrope',
       cssVariable: '--font-sans',
-      weights: ['300 800'],
+      weights: ['400 700'],
       styles: ['normal'],
       subsets: ['latin'],
       fallbacks: ['ui-sans-serif', 'system-ui', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.google(),
+      name: 'Fraunces',
+      cssVariable: '--font-serif',
+      weights: ['400 700'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Georgia', 'Times New Roman', 'serif'],
     },
     {
       provider: fontProviders.google(),
@@ -38,7 +47,7 @@ export default defineConfig({
     }),
     mdx(),
     sitemap({
-      filter: (page) => !page.includes('/og/'),
+      filter: (page) => !page.includes('/og/') && !page.includes('/blog/tags/'),
       serialize(item) {
         if (item.url === `${SITE}/`) {
           item.priority = 1.0;

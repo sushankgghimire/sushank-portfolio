@@ -4,15 +4,15 @@ import { profile } from '../../data/profile';
 ---
 
 <section class="section container" id="work" aria-labelledby="work-title">
-  <SectionHeading eyebrow="01 · Selected work" title="Production AI systems, with the numbers that mattered" id="work-title" text="Three systems from the last two years. Client details stay private, the engineering does not." />
+  <SectionHeading title="Three AI systems in production" id="work-title" text="From the last two years. Client details are private, so I describe the engineering only." />
   <div class="cases">
     {
-      profile.caseStudies.map((c, i) => (
-        <article class="case card" style={`--i:${i}`} data-spotlight data-case>
-          <div class="case-head">
+      profile.caseStudies.map((c) => (
+        <article class="case" data-reveal>
+          <p class="case-meta">
             <span class="eyebrow">{c.label}</span>
             <span class="mono">{c.employer}</span>
-          </div>
+          </p>
           <div class="case-body">
             <div class="case-main">
               <h3>{c.title}</h3>
@@ -22,19 +22,23 @@ import { profile } from '../../data/profile';
                   <li>{b}</li>
                 ))}
               </ul>
-              <ul class="stack">
-                {c.stack.map((s) => (
-                  <li class="pill">{s}</li>
-                ))}
-              </ul>
+              <p class="stack">{c.stack.join(', ')}</p>
             </div>
             <dl class="outcomes">
-              {c.outcomes.map((o) => (
-                <div class="outcome">
-                  <dt class="mono">{o.label}</dt>
-                  <dd data-counter>{o.value}</dd>
-                </div>
-              ))}
+              {c.outcomes.map((o) =>
+                /\d/.test(o.value) ? (
+                  <div class="outcome">
+                    <dt>{o.label}</dt>
+                    <dd>{o.value}</dd>
+                  </div>
+                ) : (
+                  <div class="outcome outcome-text">
+                    <dd>
+                      {o.value} {o.label}
+                    </dd>
+                  </div>
+                ),
+              )}
             </dl>
           </div>
         </article>
@@ -44,27 +48,25 @@ import { profile } from '../../data/profile';
 </section>
 
 <style>
-  .cases {
-    display: grid;
-    gap: 1.5rem;
-  }
   .case {
-    padding: clamp(1.5rem, 3vw, 2.5rem);
+    padding: 2.25rem 0 2.75rem;
+    border-top: 1px solid var(--line);
   }
-  .case-head {
+  .case-meta {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    gap: 0.25rem 1rem;
+    margin-bottom: 1.25rem;
   }
   .case-body {
     display: grid;
     gap: 2rem;
   }
   .case h3 {
-    font-size: clamp(1.4rem, 2.4vw, 2rem);
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
     margin-bottom: 0.9rem;
+    max-width: 24ch;
   }
   .context {
     color: var(--fg-muted);
@@ -75,77 +77,66 @@ import { profile } from '../../data/profile';
   .built {
     display: grid;
     gap: 0.6rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
     max-width: 64ch;
   }
   .built li {
     position: relative;
-    padding-left: 1.4rem;
-    color: #cfd3dd;
+    padding-left: 1.2rem;
   }
   .built li::before {
     content: '';
     position: absolute;
     left: 0;
-    top: 0.7em;
-    width: 0.6rem;
-    height: 1px;
+    top: 0.72em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
     background: var(--accent);
   }
   .stack {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: var(--fg-muted);
   }
   .outcomes {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-    gap: 1rem;
+    gap: 1.5rem;
     margin: 0;
     align-content: start;
   }
   .outcome {
-    padding: 1.1rem 1.2rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: rgba(10, 11, 16, 0.5);
-  }
-  .outcome dt {
-    order: 2;
-    margin-top: 0.4rem;
-    font-size: 0.68rem;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.25rem;
   }
   .outcome dd {
     margin: 0;
-    font-size: clamp(1.8rem, 3vw, 2.4rem);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    line-height: 1;
-    background: linear-gradient(120deg, #67e8f9, #a78bfa);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    font-family: var(--font-serif);
+    font-size: clamp(1.9rem, 3vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.1;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+  .outcome dt {
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+  }
+  /* Outcomes without a real number are sentences, not headline stats. */
+  .outcome-text dd {
+    font-family: var(--font-sans);
+    font-size: 1.05rem;
+    line-height: 1.4;
+    color: var(--fg);
   }
   @media (min-width: 960px) {
     .case-body {
-      grid-template-columns: 1.6fr 1fr;
-      gap: 3rem;
+      grid-template-columns: 1.7fr 1fr;
+      gap: 4rem;
     }
     .outcomes {
-      grid-template-columns: 1fr;
-    }
-    .case {
-      position: sticky;
-      top: calc(5.5rem + var(--i) * 1.25rem);
-      background: linear-gradient(180deg, #171a24, #11131a);
-    }
-    .cases {
-      padding-bottom: 4rem;
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .case {
-      position: static;
+      padding-left: 2rem;
+      border-left: 1px solid var(--line);
     }
   }
 </style>

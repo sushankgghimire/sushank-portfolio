@@ -11,7 +11,7 @@ const { project, large = false } = Astro.props;
 const { data } = project;
 ---
 
-<article class:list={['card project', { large }]} data-reveal data-spotlight>
+<article class:list={['card project', { large }]} data-reveal>
   {
     data.cover && (
       <a class="cover" href={`/projects/${project.id}/`} tabindex="-1" aria-hidden="true">
@@ -22,7 +22,7 @@ const { data } = project;
   <div class="body">
     <div class="top">
       <span class="mono">{data.year}</span>
-      <span class="mono cat">{data.category === 'ai' ? 'AI / ML' : 'Web'}</span>
+      <span class="mono">{data.category === 'ai' ? 'AI / ML' : 'Web'}</span>
     </div>
     <h3><a href={`/projects/${project.id}/`}>{data.title}</a></h3>
     <p class="tagline">{data.tagline}</p>
@@ -60,19 +60,13 @@ const { data } = project;
     aspect-ratio: 16 / 9;
     overflow: hidden;
     border-bottom: 1px solid var(--line);
-    background: #000;
+    background: var(--bg-elev-2);
   }
   .cover img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: top;
-    transition: transform 0.6s var(--ease), opacity 0.4s;
-    opacity: 0.85;
-  }
-  .project:hover .cover img {
-    transform: scale(1.03);
-    opacity: 1;
   }
   .body {
     padding: 1.4rem 1.5rem 1.5rem;
@@ -85,14 +79,13 @@ const { data } = project;
     display: flex;
     justify-content: space-between;
   }
-  .cat {
-    color: var(--accent);
-  }
   .project h3 {
     font-size: var(--fs-h3);
   }
   .project h3 a:hover {
-    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-underline-offset: 4px;
   }
   .tagline {
     color: var(--fg-muted);

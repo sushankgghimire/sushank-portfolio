@@ -20,21 +20,17 @@ const label: Record<Step['role'], string> = {
 };
 ---
 
-<section class="trace-wrap container" aria-labelledby="trace-title">
-  <div class="trace card" data-agent-trace>
-    <header class="trace-head">
-      <span class="mono trace-title" id="trace-title"><span class="dot"></span>agent trace · document extraction</span>
-      <span class="mono" data-trace-status>running</span>
-    </header>
+<section class="trace-wrap container" aria-label="An agent calling tools">
+  <div class="trace" data-agent-trace>
     <ol class="trace-lines">
       {
         steps.map((s) => (
           <li class={`line role-${s.role}`} data-trace-line>
-            <span class="role mono">{label[s.role]}</span>
+            <span class="role">{label[s.role]}</span>
             <span class="text" data-trace-text>
               {s.text}
             </span>
-            {s.meta && <span class="meta mono">{s.meta}</span>}
+            {s.meta && <span class="meta">{s.meta}</span>}
           </li>
         ))
       }
@@ -44,88 +40,60 @@ const label: Record<Step['role'], string> = {
 
 <style>
   .trace-wrap {
-    padding-top: 3rem;
+    padding-block: 0 var(--section-gap);
   }
+  /* A quiet example, not a feature. Light card, small type, capped width. */
   .trace {
-    padding: 0;
-  }
-  .trace-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.8rem 1.1rem;
-    border-bottom: 1px solid var(--line);
-    background: rgba(10, 11, 16, 0.5);
-  }
-  .trace-title {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--fg);
-  }
-  .dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--ok);
-    box-shadow: 0 0 10px var(--ok);
+    max-width: 50rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    overflow: hidden;
   }
   .trace-lines {
-    padding: 0.75rem 0;
+    padding: 0.4rem 0;
     font-family: var(--font-mono);
-    font-size: 0.82rem;
-    line-height: 1.55;
+    font-size: 0.8rem;
+    line-height: 1.5;
   }
   .line {
     display: grid;
-    grid-template-columns: 7.5rem 1fr auto;
-    gap: 0.5rem 1rem;
-    padding: 0.45rem 1.1rem;
+    grid-template-columns: 6.5rem 1fr auto;
+    gap: 0.25rem 1rem;
+    padding: 0.25rem 1rem;
     align-items: baseline;
   }
   .line[data-hidden] {
-    display: none;
+    visibility: hidden;
   }
-  .role {
-    color: var(--fg-dim);
+  .role,
+  .meta {
     font-size: 0.72rem;
+    color: var(--fg-dim);
   }
   .text {
-    color: #d6d9e2;
+    color: var(--fg);
     word-break: break-word;
   }
-  .meta {
-    color: var(--fg-dim);
-    font-size: 0.7rem;
-  }
-  .role-user .role {
+  .role-plan .text,
+  .role-reflect .text {
     color: var(--fg-muted);
   }
-  .role-plan .text {
-    color: var(--fg-muted);
-  }
-  .role-tool .role {
-    color: var(--accent);
-  }
+  .role-tool .role,
   .role-tool .text {
     color: var(--accent);
   }
   .role-obs .text {
-    color: var(--accent-2);
-  }
-  .role-reflect .role {
-    color: var(--warn);
-  }
-  .role-final .role {
-    color: var(--ok);
+    color: var(--ink);
   }
   .role-final .text {
-    color: var(--fg);
+    color: var(--ink);
+    font-weight: 600;
   }
   .text[data-typing]::after {
     content: '';
     display: inline-block;
-    width: 0.55em;
+    width: 0.5em;
     height: 1em;
     margin-left: 2px;
     background: var(--accent);
@@ -140,7 +108,7 @@ const label: Record<Step['role'], string> = {
   @media (max-width: 640px) {
     .line {
       grid-template-columns: 1fr;
-      gap: 0.15rem;
+      gap: 0.1rem;
     }
     .meta {
       display: none;
