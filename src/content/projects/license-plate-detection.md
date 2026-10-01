@@ -12,7 +12,6 @@ cover: ../../assets/projects/lp.png
 coverAlt: License plate detection project by Sushank Ghimire, bounding boxes drawn around a vehicle plate
 metrics:
   - { value: 'Two stage', label: 'plate then characters' }
-  - { value: 'Upload to result', label: 'complete workflow' }
 ---
 
 A two-stage computer vision pipeline. The first YOLO model finds the license plate in a photo or video frame. The second reads the characters on the cropped plate. The web app takes an upload and returns the plate number with the detections drawn on the image.

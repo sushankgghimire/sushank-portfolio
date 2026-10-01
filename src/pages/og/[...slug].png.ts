@@ -14,7 +14,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
       props: {
         kind: 'home',
         title: 'Sushank Ghimire',
-        subtitle: 'AI engineer building LLM agents, RAG systems and document intelligence in production.',
+        subtitle: 'AI engineer building agents, RAG systems and document intelligence in production.',
         meta: 'AI ENGINEER',
       } satisfies Props,
     },

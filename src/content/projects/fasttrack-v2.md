@@ -1,7 +1,7 @@
 ---
 title: FastTrackV2
 tagline: Django 5 and DRF rebuild of an engineering institute's platform with Docker, uv and a justfile
-category: ai
+category: web
 featured: true
 order: 4
 year: 2025
@@ -10,7 +10,6 @@ links:
   repo: https://github.com/sushankgghimire/FastTrackV2
 metrics:
   - { value: 'One command', label: 'bootstrap with just' }
-  - { value: 'Containerised', label: 'dev and prod' }
 ---
 
 The second generation of the platform I run for Fast Track Engineering Institute, rebuilt so that a new developer can be productive in one command.

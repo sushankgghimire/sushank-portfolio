@@ -1,7 +1,7 @@
 ---
 title: PokeQuery
 tagline: Async FastAPI service that caches the PokeAPI into PostgreSQL and serves filtered queries
-category: ai
+category: web
 featured: true
 order: 3
 year: 2024
@@ -10,7 +10,6 @@ links:
   repo: https://github.com/sushankgghimire/PokeQuery
 metrics:
   - { value: 'v1', label: 'versioned REST API' }
-  - { value: 'Async', label: 'end to end' }
 ---
 
 A small, clean backend I built to practise the patterns I use at work: an async FastAPI app that fetches Pokemon from the public PokeAPI on first request, stores them in PostgreSQL, and serves every later request from the database.

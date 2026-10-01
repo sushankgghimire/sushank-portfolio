@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 import Icon from './Icon.astro';
+import { categoryLabel } from '../lib/category';
 
 interface Props {
   project: CollectionEntry<'projects'>;
@@ -22,7 +23,7 @@ const { data } = project;
   <div class="body">
     <div class="top">
       <span class="mono">{data.year}</span>
-      <span class="mono">{data.category === 'ai' ? 'AI / ML' : 'Web'}</span>
+      <span class="mono">{categoryLabel[data.category]}</span>
     </div>
     <h3><a href={`/projects/${project.id}/`}>{data.title}</a></h3>
     <p class="tagline">{data.tagline}</p>

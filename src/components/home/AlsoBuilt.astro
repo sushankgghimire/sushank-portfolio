@@ -2,17 +2,17 @@
 import { getCollection } from 'astro:content';
 import Icon from '../Icon.astro';
 
-const web = (await getCollection('projects', (p) => p.data.category === 'web')).sort((a, b) => a.data.order - b.data.order);
+const rest = (await getCollection('projects', (p) => !p.data.featured)).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <section class="container also" aria-labelledby="also-title">
   <div class="also-head" data-reveal>
     <p class="eyebrow">Also built</p>
-    <h2 id="also-title">Web platforms and backends I have shipped along the way</h2>
+    <h2 id="also-title">Other work I have shipped along the way</h2>
   </div>
   <ul class="also-list">
     {
-      web.map((p) => (
+      rest.map((p) => (
         <li class="also-item" data-reveal>
           <a href={`/projects/${p.id}/`} class="also-link">
             <span class="also-title">{p.data.title}</span>

@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import Icon from '../../components/Icon.astro';
+import { categoryLabel } from '../../lib/category';
 import { graph, person, website, breadcrumbs, softwareSourceCode } from '../../lib/jsonld';
 import '../../styles/prose.css';
 
@@ -35,7 +36,7 @@ const jsonld = graph(
     </nav>
     <header class="head" data-reveal>
       <div class="meta">
-        <span class="pill">{data.category === 'ai' ? 'AI / ML' : 'Web'}</span>
+        <span class="pill">{categoryLabel[data.category]}</span>
         <span class="mono">{data.year}</span>
       </div>
       <h1>{data.title}</h1>

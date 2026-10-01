@@ -23,7 +23,7 @@ const projects = defineCollection({
     z.object({
       title: z.string(),
       tagline: z.string().max(140),
-      category: z.enum(['ai', 'web']),
+      category: z.enum(['ai', 'web', 'other']),
       featured: z.boolean().default(false),
       order: z.number().default(99),
       year: z.number(),

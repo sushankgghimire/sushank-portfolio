@@ -1,12 +1,12 @@
 ---
 title: Digital Piano
 tagline: A playable piano in C++ and SFML with single notes and common chords
-category: web
+category: other
 order: 13
 year: 2022
 stack: [C++, SFML]
 links:
-  live: https://gitlab.com/sushankgghimire/piano/
+  repo: https://gitlab.com/sushankgghimire/piano/
 cover: ../../assets/projects/piano.png
 coverAlt: Digital piano simulation in C++ by Sushank Ghimire
 ---

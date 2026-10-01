@@ -39,7 +39,7 @@ export const profile = {
   familyName: 'Ghimire',
   alternateName: ['Sushank', 'Sushank G.'],
   jobTitle: 'AI Engineer',
-  headline: 'AI engineer building LLM agents, RAG systems and document intelligence in production.',
+  headline: 'AI engineer building agents, RAG systems and document intelligence in production.',
   shortBio:
     'Sushank builds production AI systems: agents that call tools and browse the web, retrieval pipelines that survive messy real-world documents, and the FastAPI backends that keep them up.',
   location: { locality: 'Kathmandu', country: 'NP', countryName: 'Nepal' },
@@ -109,11 +109,11 @@ export const profile = {
       location: 'Remote',
       summary: 'Agents that operate real web applications and read real documents for insurance operations.',
       bullets: [
-        'Built production browser automation and RPA agents driven by LLM action loops with dynamic DOM handling, so multi-step web workflows run without a human at the keyboard.',
+        'Built production browser automation and RPA agents that plan and act in a loop and handle dynamic DOM changes, so multi-step web workflows run without a human at the keyboard.',
         'Developed end-to-end document parsing and extraction pipelines using multimodal LLMs and OCR to pull structured data out of unstructured documents and tables.',
         'Automated SEO work end to end with agentic flows for keyword research, competitor analysis, and metadata and content generation.',
       ],
-      tags: ['LLM agents', 'Browser automation', 'Multimodal extraction', 'Python'],
+      tags: ['Agents', 'Browser automation', 'Multimodal extraction', 'Python'],
     },
     {
       company: 'Verisk Nepal',
@@ -207,7 +207,7 @@ export const profile = {
     {
       id: 'browser-agents',
       label: 'Case study 02',
-      title: 'LLM agents that operate insurance web portals',
+      title: 'Agents that operate insurance web portals',
       employer: 'Renegade Insurance',
       context:
         'Insurance operations run on third-party portals with no APIs. Every quote, policy lookup and document pull was a person clicking through forms.',
@@ -235,7 +235,7 @@ export const profile = {
         'FastAPI and Django services that exposed the models as reliable, versioned endpoints.',
       ],
       outcomes: [
-        { value: 'Scalable', label: 'assistants across client accounts' },
+        { value: 'Assistants', label: "tuned to each client's use case" },
         { value: 'Automated', label: 'document processing' },
       ],
       stack: ['OpenAI', 'Claude', 'FastAPI', 'Django', 'PostgreSQL'],
@@ -323,7 +323,7 @@ export const profile = {
     },
     {
       n: '03',
-      title: 'LLM browser automation',
+      title: 'Browser automation',
       text: 'Agents that read the live DOM and complete multi-step workflows in web apps that have no API.',
       tags: ['RPA', 'Dynamic DOM', 'Playwright'],
     },

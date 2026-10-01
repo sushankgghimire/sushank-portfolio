@@ -92,7 +92,7 @@ const jsonld = graph(
         <div>
           <p class="author-name">Written by <a href="/">Sushank Ghimire</a></p>
           <p class="muted">
-            AI engineer in Kathmandu, Nepal. Currently {profile.currentEmployer.role} at {profile.currentEmployer.name}, building LLM agents and retrieval systems that
+            AI engineer in Kathmandu, Nepal. Currently {profile.currentEmployer.role} at {profile.currentEmployer.name}, building agents and retrieval systems that
             run in production.
           </p>
           <div class="author-links">
@@ -214,9 +214,12 @@ const jsonld = graph(
     padding-left: 1.5rem;
     font-size: 0.84rem;
   }
-  .toc a:hover,
-  .toc a[aria-current='true'] {
+  .toc a:hover {
     color: var(--fg);
+    border-color: var(--line-strong);
+  }
+  .toc a[aria-current='true'] {
+    color: var(--ink);
     border-color: var(--accent);
   }
   .post-foot {
@@ -294,8 +297,10 @@ const jsonld = graph(
       gap: 4rem;
       align-items: start;
     }
+    /* Stretch the column to the article's height, otherwise the sticky TOC has no room to move. */
     .side {
       display: block;
+      align-self: stretch;
     }
   }
 </style>
@@ -305,17 +310,20 @@ const jsonld = graph(
   if (toc) {
     const links = [...toc.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
     const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean) as HTMLElement[];
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const e of entries) {
-          if (e.isIntersecting) {
-            links.forEach((l) => l.removeAttribute('aria-current'));
-            links.find((l) => decodeURIComponent(l.hash.slice(1)) === e.target.id)?.setAttribute('aria-current', 'true');
-          }
-        }
-      },
-      { rootMargin: '-20% 0px -70% 0px' },
-    );
+    // Current section = the last heading that has scrolled above the 30% line. Recomputed whenever a
+    // heading crosses that line, so it stays right when scrolling up or jumping via a link.
+    const mark = () => {
+      const line = innerHeight * 0.3 + 1;
+      let current: HTMLElement | undefined;
+      for (const t of targets) {
+        if (t.getBoundingClientRect().top > line) break;
+        current = t;
+      }
+      links.forEach((l) => l.removeAttribute('aria-current'));
+      if (current) links.find((l) => decodeURIComponent(l.hash.slice(1)) === current!.id)?.setAttribute('aria-current', 'true');
+    };
+    const io = new IntersectionObserver(mark, { rootMargin: '0px 0px -70% 0px' });
     targets.forEach((t) => io.observe(t));
+    mark();
   }
 </script>

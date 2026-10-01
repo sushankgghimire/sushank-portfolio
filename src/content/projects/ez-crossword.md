@@ -11,9 +11,6 @@ links:
   repo: https://github.com/sushankgghimire/EZ-Crossword
 cover: ../../assets/projects/crossword.png
 coverAlt: EZ-Crossword web app by Sushank Ghimire, showing a solved crossword grid
-metrics:
-  - { value: 'QA models', label: 'clue answering' }
-  - { value: 'End to end', label: 'solve and generate' }
 ---
 
 EZ-Crossword started as my final year project and turned into something I still like showing people. You hand it a crossword from a newspaper and it solves it. Or you hand it a theme and it builds one.
